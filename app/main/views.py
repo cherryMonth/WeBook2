@@ -5,14 +5,16 @@ from flask import Blueprint, current_app, session
 from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword
 from flask_login import login_required, current_user
 from app import db
+from functools import reduce
 from werkzeug.utils import secure_filename
-from app.main.models import Category, Favorite, User, Comment, Role, Information
+from app.main.models import Category, Favorite, User, Comment, Topic, Information
 import datetime
 from ..email import send_email
 import os
 from flask import render_template, g
 import time
 from sqlalchemy import text
+from sqlalchemy.sql import func
 import subprocess
 import threading
 from app.main.auth import logout
@@ -85,6 +87,7 @@ def edit():
         p.title = form.title.data
         p.content = form.text.data
         p.user = current_user.id
+        p.topic = 1
         p.update_time = datetime.datetime.utcnow()
         db.session.add(p)
         db.session.commit()
@@ -97,8 +100,8 @@ def edit():
             db.session.flush()
             info.info = u"您关注的用户 " + current_user.username + u" 发表了新的文章 " + u"<a style='color: #d82433' " \
                 u"href='{}?check={}'>{}</a>".format(u"/display/" + str(p.id), info.id, p.title) + u"。"
-        t = threading.Thread(target=work, args=(str(p.id), p.content.encode("utf-8")))
-        t.start()
+        # t = threading.Thread(target=work, args=(str(p.id), p.content.encode("utf-8")))
+        # t.start()
         db.session.commit()
 
         flash(u'保存成功！', 'success')
@@ -111,14 +114,17 @@ def index():
     return render_template("index.html")
 
 
-@main.route("/my_doc/<int:key>/<int:_id>", methods=['GET', "POST"])
-def my_doc(key, _id):
-    temp = Category.query.filter_by(user=key)
-    length = len(temp.all())
-    page_num = int(length / 10 if length % 10 == 0 else length / 10 + 1)
-    docs = temp.order_by(Category.id.desc()).paginate(_id, 10, error_out=True).items
-    # 总数量 文章列表 当前id 总页数
-    return render_template("mydoc.html", key=key, length=length, docs=docs, page=_id, page_num=page_num)
+@main.route("/user_information/<int:key>", methods=['GET', "POST"])
+def user_information(key):
+    user = User.query.filter_by(id=key).first_or_404()
+    follow = len(user.followed.all())  # 关注人数
+    fans = len(user.followers.all())  # 粉丝人数
+    category = len(user.categories.all())
+    word_count = Category.query.with_entities(func.sum(Category.content)).all()
+    word_count = sum(map(lambda x:x[0] or 0, word_count))
+    collect_num = Category.query.filter_by(id=key).with_entities(func.sum(Category.collect_num)).first()[0] or 0
+    return render_template("user_info.html", user=user, follow=follow, fans=fans, category=category,
+                           word_count=word_count, collect_num=collect_num)
 
 
 @main.route("/display/<key>", methods=['GET', "POST"])
@@ -427,7 +433,7 @@ def edit_basic():
             flash(u"该用户名已经被注册过，请重新输入!", "warning")
             return redirect(url_for("main.edit_basic"))
 
-        _file = request.files['filename'] if request.files.has_key("filename") else None
+        _file = request.files['filename'] if 'filename' in request.files else None
         if _file:
             _type = _file.filename.split(".")[-1].lower()
 

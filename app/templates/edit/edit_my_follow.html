@@ -12,7 +12,7 @@
             <li><a href="{{ url_for('user.follow_me') }}">关注我的人</a></li>
         </ul>
     </div>
-    <div class="main" style="margin-left:10%;overflow-y:scroll;width: 800px;">
+    <div class="main" style="margin-left:10%;overflow-y:scroll;width: 650px;">
         {% for user in user_list %}
             <div class="main" style="margin-left:10%;height: 500px; width:600px; border-style: outset;">
                 <h3><img src="/show_image/{{ user.id }}"

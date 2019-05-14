@@ -52,8 +52,49 @@ class Role(db.Model):  # 角色
         return '<Role %r>' % self.name
 
 
-class Information(db.Model):
+class TopicMember(db.Model):  # 专题小组
+    __tablename__ = 'topicmember'
 
+    id = db.Column(db.Integer(), primary_key=True, nullable=False)
+    topic_id = db.Column(db.Integer(), db.ForeignKey('topic.id'), nullable=False)
+    topic_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
+    user_type = db.Column(db.Integer())  # 0 普通用户
+                                         # 1 成员用户
+                                         # 2 管理员用户
+                                         # 3 超级管理员
+
+
+class Topic(db.Model):
+    __tablename__ = 'topic'
+
+    id = db.Column(db.Integer(), primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
+    type_id = db.Column(db.Integer, nullable=False)
+    topic_name = db.Column(db.String(64), unique=True)
+    topic_member = db.relationship('TopicMember',  # 专题对应的小组
+                               foreign_keys=[TopicMember.topic_id],
+                               backref=db.backref('topic', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+
+    category = db.relationship('TopicMember',  # 专题对应的小组
+                               foreign_keys=[TopicMember.topic_id],
+                               backref=db.backref('category', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+
+
+class ScenicSpot(db.Model):
+    __tablename__ = 'scenicspot'
+
+    id = db.Column(db.Integer(), primary_key=True, nullable=False)
+    name = db.Column(db.String(64), unique=True)
+    rate = db.Column(db.Float(), default=0)
+    play_guide = db.Column(db.String(64))
+
+
+
+class Information(db.Model):
     __tablename__ = 'information'
 
     id = db.Column(db.Integer, primary_key=True)
@@ -91,7 +132,6 @@ class Comment(db.Model):
 
 
 class Category(db.Model):
-
     __tablename__ = "category"
     __searchable__ = ['title', 'content']
     __analyzer__ = SimpleAnalyzer()
@@ -103,20 +143,21 @@ class Category(db.Model):
     update_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     collect_num = db.Column(db.Integer(), default=0, nullable=False)
     commented = db.relationship('Comment',  # 记录文章的评论数
-                               backref=db.backref('post', lazy='joined'),
-                               lazy='dynamic',
-                               cascade='all, delete-orphan')
+                                backref=db.backref('post', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     disabled = db.Column(db.Boolean, nullable=False, default=False)
-
+    rate = db.Column(db.Float, default=0)
     favorite = db.relationship('Favorite',  # 关注这篇文章的人
                                foreign_keys=[Favorite.favorited_id],
                                backref=db.backref('favorited', lazy='joined'),
                                lazy='dynamic',
                                cascade='all, delete-orphan')
 
-    def __repr__(self):
+    topic = db.Column(db.Integer(), db.ForeignKey('topic.id'), nullable=False)
 
+    def __repr__(self):
         data = {
             'title': self.title,
             'content': self.content
@@ -134,7 +175,6 @@ class Follow(db.Model):
 
 
 class User(db.Model, UserMixin):
-
     __tablename__ = 'users'
 
     __searchable__ = ['email', 'username']
@@ -168,6 +208,24 @@ class User(db.Model, UserMixin):
                                backref=db.backref('follower', lazy='joined'),
                                lazy='dynamic',
                                cascade='all, delete-orphan')
+
+    topic = db.relationship('Topic',  # 用户关注的人
+                            foreign_keys=[Topic.user_id],
+                            backref=db.backref('topic', lazy='joined'),
+                            lazy='dynamic',
+                            cascade='all, delete-orphan')
+
+    topic_user = db.relationship('TopicMember',  # 专题对应的小组
+                                   foreign_keys=[TopicMember.topic_user_id],
+                                   backref=db.backref('topic_user', lazy='joined'),
+                                   lazy='dynamic',
+                                   cascade='all, delete-orphan')
+
+    categories = db.relationship('Category',  # 关注用户的人
+                                foreign_keys=[Category.user],
+                                backref=db.backref('followed', lazy='joined'),
+                                lazy='dynamic',
+                                cascade='all, delete-orphan')
 
     followers = db.relationship('Follow',  # 关注用户的人
                                 foreign_keys=[Follow.followed_id],
@@ -238,7 +296,7 @@ class User(db.Model, UserMixin):
         try:
             data = s.loads(token)
         except Exception as e:
-            print (str(e))
+            print(str(e))
             return False
         if data.get('confirm') != self.id:  # 若解密后不相同则验证失败
             return False

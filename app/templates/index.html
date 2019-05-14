@@ -71,6 +71,7 @@
                                                         <li><a href="/my_doc/{{ current_user.id }}/1">我的文章</a></li>
                                                         <li><a href="{{ url_for('main.show_collect') }}">收藏的文章</a></li>
                                                         <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
+                                                        <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
                                                     </ul>
                                                 </div>
                                             </li>
@@ -242,7 +243,7 @@
         </script>
     {% endblock content_script %}
     {% block footer %}
-        <footer style="margin-top:35%">
+        <footer style="margin-top: 10%">
             <div class="wrapper footer">
                 <ul>
                     <li class="links">

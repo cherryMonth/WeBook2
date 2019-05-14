@@ -1,7 +1,6 @@
 alembic==1.0.10
 Babel==2.5.3
 blinker==1.4
-certifi==2018.8.24
 chardet==3.0.4
 Click==7.0
 Flask==1.0.2
