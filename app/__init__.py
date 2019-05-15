@@ -29,6 +29,7 @@ def create_app(config_name):
     from app.main.views import main
     from app.main.auth import auth
     from app.main.user import user
+    from app.main.dropdown import dropdown
 
     @main.before_request
     @user.before_request
@@ -41,6 +42,7 @@ def create_app(config_name):
                 g.message_nums = None
 
     app.register_blueprint(auth)
+    app.register_blueprint(dropdown)
     app.register_blueprint(main)
     app.register_blueprint(user)
 

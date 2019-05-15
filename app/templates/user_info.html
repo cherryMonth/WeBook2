@@ -142,7 +142,7 @@
         }
 
         .note-list .meta {
-            margin-left: 27%;
+            margin-left: 22%;
             padding-right: 0 !important;
             font-size: 12px;
             font-weight: 400;
@@ -249,24 +249,24 @@
             </div>
         </div>
         <ul class="container" data-pjax-container="#list-container">
-            <li class="active li" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
+            <li id="category" onclick="f1(this)" class="songjian active li" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
     font-size: 15px;
     font-weight: 700;
     color: #969696;
     line-height: 25px;"><i class="iconfont ic-articles"></i> 文章</a>
             </li>
-            <li class="li" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
+            <li id="dynamics" onclick="f1(this)" class="li songjian" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
     font-size: 15px;
     font-weight: 700;
     color: #969696;
     line-height: 25px;"><i class="iconfont ic-feed"></i> 动态</a></li>
-            <li class="li" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
+            <li id="comment" onclick="f1(this)" class="li songjian" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
     font-size: 15px;
     font-weight: 700;
     color: #969696;
     line-height: 25px;"><i class="iconfont ic-latestcomments"></i>
                 最新评论</a></li>
-            <li class="li" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
+            <li id="hot" class="li songjian" onclick="f1(this)" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
     font-size: 15px;
     font-weight: 700;
     color: #969696;
@@ -277,12 +277,19 @@
 
             </ur>
         </div>
+        <div style="float: right">
+            <a href="#" id="toTop" title="点击移动到顶部!"
+               style="display: block;bottom: 100px;margin-right: 100px;height: 40px;"><span id="toTopHover"
+                                                                                           style="opacity: 0;"></span></a>
+        </div>
         <script src="/static/js/jquery-1.11.1.min.js"></script>
         <script src="/static/js/moment-with-locales.min.js"></script>
         <script>
+
             window.num = 1;
+            window.page = "get_category";
             $.ajax({
-                url: "/get_category?key={{ user.id }}&_id=" + window.num,
+                url: "/" + window.page + "?key={{ user.id }}&_id=" + window.num,
                 type: "POST",
                 dataType: "json",
                 success: function (data) {
@@ -296,7 +303,7 @@
                 //或者  scrollH = $(document).scrollTop();
                 if (windowH + scrollH >= documentH) {
                     $.ajax({
-                        url: "/get_category?key={{ user.id }}&_id=" + window.num,
+                        url: "/" + window.page + "?key={{ user.id }}&_id=" + window.num,
                         type: "POST",
                         dataType: "json",
                         success: function (data) {
@@ -305,6 +312,29 @@
                     });
                 }
             });
+
+            function f1(handler) {
+                elems = Array.from(document.getElementsByClassName('songjian'));
+                for (index in elems) {
+                    if (elems[index].id === handler.id) {
+                        elems[index].setAttribute("class", "li active songjian");
+                        window.page = "get_" + handler.id;
+                        window.num = 1;
+                        document.getElementById("note-list").innerHTML = "";
+                        $.ajax({
+                            url: "/" + window.page + "?key={{ user.id }}&_id=" + window.num,
+                            type: "POST",
+                            dataType: "json",
+                            success: function (data) {
+                                f(data);
+                            }
+                        });
+                    } else {
+                        elems[index].setAttribute("class", "li songjian");
+                    }
+                }
+            }
+
         </script>
     {% endblock content %}
 
@@ -329,7 +359,10 @@
             });
 
             function f(data_list) {
-
+                if (data_list.length === 0) {
+                    alert("我也是有底线的！");
+                    return 0;
+                }
                 for (index in data_list) {
                     document.getElementById("note-list").innerHTML += data_list[index]['html'];
                 }
@@ -354,6 +387,7 @@
                         }
                     }
                 }
+
                 flask_moment_render_all();
             }
         </script>

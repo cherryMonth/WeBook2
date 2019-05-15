@@ -3,14 +3,15 @@
 {% block head %}
     {% block title %}We Book {% endblock %}
 
-{% block metas %}
- <meta name="baidu-site-verification" content="Yswrm2DNTr" />
-<link rel="shortcut icon" href="/static/favicon.ico" />
-<link rel="bookmark" href="/static/favicon.ico"/>
-<meta name="description" content="WeBook是一个优质的创作社区，在这里，你可以任性地创作，一篇短文、一张照片、一首诗、一幅画……我们相信，每个人都是生活中的艺术家，有着无穷的创造力。"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0"/>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-{% endblock metas %}
+    {% block metas %}
+        <meta name="baidu-site-verification" content="Yswrm2DNTr"/>
+        <link rel="shortcut icon" href="/static/favicon.ico"/>
+        <link rel="bookmark" href="/static/favicon.ico"/>
+        <meta name="description"
+              content="WeBook是一个优质的创作社区，在这里，你可以任性地创作，一篇短文、一张照片、一首诗、一幅画……我们相信，每个人都是生活中的艺术家，有着无穷的创造力。"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    {% endblock metas %}
     {% block styles %}
         <script type="application/x-javascript"> addEventListener("load", function () {
             setTimeout(hideURLbar, 0);
@@ -33,6 +34,71 @@
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
+
+            .note-list {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .note-list li {
+                position: relative;
+                width: 100%;
+                margin: 0 0 15px;
+                padding: 15px 2px 20px 0;
+                border-bottom: 1px solid #f0f0f0;
+                word-wrap: break-word;
+            }
+
+            .note-list li.have-img {
+                min-height: 140px;
+            }
+
+            .note-list .have-img .wrap-img {
+                position: absolute;
+                top: 50%;
+                margin-top: -60px;
+                right: 0;
+                width: 125px;
+                height: 100px;
+            }
+
+            .note-list .title {
+                margin: -7px 0 4px;
+                display: inherit;
+                font-size: 18px;
+                font-weight: 700;
+                line-height: 1.5;
+                font-family: Georgia, Times New Roman, Times, Songti SC, serif;
+            }
+
+            .note-list .abstract {
+                margin: 0 0 8px;
+                font-size: 13px;
+                line-height: 24px;
+                color: #999;
+            }
+
+            .note-list .meta {
+                margin-left: 22%;
+                padding-right: 0 !important;
+                font-size: 12px;
+                font-weight: 400;
+                line-height: 20px;
+            }
+
+            .jsd-meta {
+                color: #ea6f5a !important;
+            }
+
+            .note-list .title {
+                margin: -7px 0 4px;
+                display: inherit;
+                font-size: 18px;
+                font-weight: 700;
+                line-height: 1.5;
+            }
+
         </style>
     {% endblock styles %}
 {% endblock head %}
@@ -45,12 +111,13 @@
                 <div class="inner-header-agile">
                     <nav class="navbar navbar-default">
                         <div class="navbar-header">
-                            <h1><a href="{{ url_for('main.index') }}"><span>W</span>e<span>B</span>ook</a></h1>
+                            <h1><a href="{{ url_for('dropdown.get_index_page', _id=1) }}"><span>W</span>e<span>B</span>ook</a>
+                            </h1>
                         </div>
                         <!-- navbar-header -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav">
-                                <li><a href="{{ url_for('main.index') }}">首页</a></li>
+                                <li><a href="{{ url_for('dropdown.get_index_page', _id=1) }}">首页</a></li>
                                 <li><a href="{{ url_for('main.find_file', key=7) }}">发现</a></li>
                                 <li><a href="{{ url_for('user.find_user') }}">关注</a></li>
                                 {% if not current_user.is_anonymous %}
@@ -68,7 +135,8 @@
                                             <li>
                                                 <div class="col-sm-4">
                                                     <ul class="multi-column-dropdown">
-                                                        <li><a href="/my_doc/{{ current_user.id }}/1">我的文章</a></li>
+                                                        <li><a href="/user_information/{{ current_user.id }}">我的主页</a>
+                                                        </li>
                                                         <li><a href="{{ url_for('main.show_collect') }}">收藏的文章</a></li>
                                                         <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
                                                         <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
@@ -117,7 +185,7 @@
         </div>
     {% endblock message %}
 
-    <div class="container" style="width:92%;margin-top:4%"> <!-- 如果需要全屏则需要把class=container去掉 -->
+    <div style="width:50%;margin-left: 250px;"> <!-- 如果需要全屏则需要把class=container去掉 -->
         <div id="demo-1"
              data-zs-src='["/static/images/2.jpg", "/static/images/1.jpg", "/static/images/3.jpg","/static/images/4.jpg"]'
              data-zs-overlay="dots">
@@ -125,7 +193,7 @@
                 <div class="header-w3-agileits" id="home">
                     <div class="inner-header-agile">
                         <div class="container text-center">
-                            <div class="content">
+                            <div class="content" style="margin-right: 300px;">
                                 <div class="header-text btn">
                                     <h1><span id="head-title" style="color:white"></span></h1>
                                 </div>
@@ -137,84 +205,70 @@
         </div>
     </div>
     {% block content %}
-        <div id="services">
-            <div class="container text-center">
-                <div class="row">
-                    <div class="col-md-8 col-md-offset-2">
-                        <div class="section-title">
-                            <h2>We Book</h2>
-                            <hr>
-                        </div>
-                        <p>Nice meet to you.</p>
-                    </div>
-                </div>
+        <div id="list-container" style="margin-right: 6%;">
+            <ur class="note-list" id="note-list">
 
-                <div class="space"></div>
-                <div class="row">
-                    <div class="col-md-4 col-sm-4">
-                        <div class="service">
-                            <span class="fa fa-book fa-3x"></span>
-                            <h4>Past</h4>
-                            <p>轻轻的风，吹开你紧琐的眉头，让所有的愁向后飞去。请不要回头去追那些不属于你的忧愁，你应该向前奔跑，因为快乐在前方! </p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4">
-                        <div class="service">
-                            <span class="fa fa-bicycle fa-3x"></span>
-                            <h4>Now</h4>
-                            <p>内心越强大，笑的越漂亮。</p>
-                        </div>
-                    </div>
-
-                    <div class="col-md-4 col-sm-4">
-                        <div class="service">
-                            <span class="fa fa-plug fa-3x"></span>
-                            <h4>Future</h4>
-                            <p> 在许多的犹豫中，你做对了一件事情，那就是勇敢地上路，不要徘徊在许多假设性的框架里。那是人生的一个大关卡，你做了一个正确的选择，那就是：尝试、再尝试，不害怕所有的新鲜事。</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </ur>
         </div>
-        <div id="cta">
-            <div class="container text-center">
-                <a href="#" class="btn go-to-btn">Check our shop</a>
-            </div>
-        </div>
+        <script src="/static/js/jquery-1.11.1.min.js"></script>
+        <script src="/static/js/moment-with-locales.min.js"></script>
+        <script>
 
-        <div id="about-us">
-            <div class="row text-center">
-                <div class="col-md-8 col-md-offset-2">
-                    <div class="section-title">
-                        <h2>About Us</h2>
-                        <hr>
-                    </div>
-                    <p>有时候，不小心知道了一些事，才发现自己所在乎的事是那么可笑，所以啊，对自己好点，反正已经这么辛苦了。</p>
+            window.num = 1;
+            window.page = "get_index_page";
+            $.ajax({
+                url: "/" + window.page + "?_id=" + window.num,
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    f(data);
+                }
+            });
+            $(window).scroll(function () {
+                var windowH = $(window).height();//设备可见区域高度
+                var documentH = $(document).height();//整个网页的高度（包括未显示的部分）
+                var scrollH = $(window).scrollTop();//滚动条滚动上去的高度
+                //或者  scrollH = $(document).scrollTop();
+                if (windowH + scrollH >= documentH) {
+                    $.ajax({
+                        url: "/" + window.page + "?_id=" + window.num,
+                        type: "POST",
+                        dataType: "json",
+                        success: function (data) {
+                            f(data);
+                        }
+                    });
+                }
+            });
 
-                </div>
-                <div class="col-md-10 col-sm-10" style="margin-left:35%;margin-top:50px;">
-                    <div class="text-center">
-                        <div class="col-md-4 col-sm-4">
-                            <div class="team">
-                                <img src="/static/images/me.jpg" class="img-responsive img-circle" alt="...">
-                                <br>
-                                <h4>就是SSS...J啊</h4>
-                                <p class="small">Web Designer</p>
-                                <hr>
-                            </div>
-                        </div>
+            function f1(handler) {
+                elems = Array.from(document.getElementsByClassName('songjian'));
+                for (index in elems) {
+                    if (elems[index].id === handler.id) {
+                        elems[index].setAttribute("class", "li active songjian");
+                        window.page = "get_" + handler.id;
+                        window.num = 1;
+                        document.getElementById("note-list").innerHTML = "";
+                        $.ajax({
+                            url: "/" + window.page + "?_id=" + window.num,
+                            type: "POST",
+                            dataType: "json",
+                            success: function (data) {
+                                f(data);
+                            }
+                        });
+                    } else {
+                        elems[index].setAttribute("class", "li songjian");
+                    }
+                }
+            }
 
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
+        </script>
     {% endblock content %}
 
     {% block content_script %}
         <script src="/static/js/jquery-1.11.1.min.js"></script>
+        <script src="/static/js/moment-with-locales.min.js"></script>
         <script>
             $(document).ready(function () {
                 $(".dropdown").hover(
@@ -240,16 +294,49 @@
                     startDelay: 100
                 });
             });
+
+            function f(data_list) {
+                if (data_list.length === 0) {
+                    alert("我也是有底线的！");
+                    return 0;
+                }
+                for (index in data_list) {
+                    document.getElementById("note-list").innerHTML += data_list[index]['html'];
+                }
+                window.num += 1;
+                moment.locale("zh_CN");
+
+                function flask_moment_render(elem) {
+                    elem.innerHTML = eval('moment("' + elem.dataset.timestamp + '").' + elem.dataset.format + ';');
+                    elem.classList.remove('flask-moment');
+                    elem.style.display = 'inline';
+                }
+
+                function flask_moment_render_all() {
+                    elems = Array.from(document.getElementsByClassName('flask-moment'));
+                    for (var i = 0; i < elems.length; i++) {
+                        elem = elems[i];
+                        flask_moment_render(elem);
+                        if (elem.dataset.refresh > 0) {
+                            setInterval(function () {
+                                flask_moment_render(this);
+                            }.bind(elem), parseInt(elem.dataset.refresh));
+                        }
+                    }
+                }
+
+                flask_moment_render_all();
+            }
         </script>
     {% endblock content_script %}
     {% block footer %}
-        <footer style="margin-top: 10%">
+        <footer style="margin-top: 30%">
             <div class="wrapper footer">
                 <ul>
                     <li class="links">
                         <ul>
-      <li><img src="/static/img/record_logo.png" style="float:left; width: 18px; height: 18px;">
-     <a style="color:white" href="http://www.miitbeian.gov.cn">豫ICP备18023119号</a></li>
+                            <li><img src="/static/img/record_logo.png" style="float:left; width: 18px; height: 18px;">
+                                <a style="color:white" href="http://www.miitbeian.gov.cn">豫ICP备18023119号</a></li>
                             <li><a href="/">目前是正式1.5版本哦. O(∩_∩)O</a></li>
                         </ul>
                     </li>

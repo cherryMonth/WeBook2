@@ -120,8 +120,8 @@ def user_information(key):
     follow = len(user.followed.all())  # 关注人数
     fans = len(user.followers.all())  # 粉丝人数
     category = len(user.categories.all())
-    word_count = Category.query.with_entities(func.sum(Category.content)).all()
-    word_count = sum(map(lambda x:x[0] or 0, word_count))
+    categories = Category.query.filter_by(user=key).all()
+    word_count = sum(map(lambda x:len(x.content), categories))
     collect_num = Category.query.filter_by(id=key).with_entities(func.sum(Category.collect_num)).first()[0] or 0
     return render_template("user_info.html", user=user, follow=follow, fans=fans, category=category,
                            word_count=word_count, collect_num=collect_num)
