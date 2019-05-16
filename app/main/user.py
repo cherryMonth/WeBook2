@@ -53,7 +53,7 @@ def followed_user(key):
         _info.info = u"用户" + current_user.username + u" 对您进行了关注!"
         db.session.add(_info)
         flash(u"关注成功!", "success")
-    return redirect(url_for("user.find_user"))
+    return redirect(request.referrer)
 
 
 @user.route("/unfollowed_user/<key>", methods=['GET', 'POST'])
@@ -72,7 +72,7 @@ def unfollowed_user(key):
         db.session.add(_info)
         current_user.unfollow(_user)
         flash(u"取消关注成功!", "success")
-    return redirect(url_for("user.find_user"))
+    return redirect(request.referrer)
 
 
 @user.route("/information/<int:page>", methods=['GET', 'POST'])
@@ -170,7 +170,7 @@ def send_info(key):
     db.session.add(info)
     db.session.commit()
     flash(u"发送成功!", "success")
-    return redirect(url_for("main.index"))
+    return redirect(request.referrer)
 
 
 @user.route("/upload_images", methods=['POST', "GET"])
@@ -255,7 +255,44 @@ def get_category():
 
 @user.route('/get_dynamics', methods=['GET', "POST"])
 def get_dynamics():
-    return "hello world"
+    key = int(request.args['key'])
+    _id = int(request.args['_id'])
+    tmp = Information.query.filter_by(receive_id=key).order_by(Information.time.desc())
+    length = len(tmp.all())
+    target_page_num = 5
+    page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
+    if _id > page_num:
+        return '[]'
+    info_list = tmp.paginate(_id, target_page_num, error_out=True).items
+    info_html_list = list()
+    for info in info_list:
+        html = """<li id="{}" class="have-img" style="margin-left: 22%">
+                        <a class="avator" href="/user_information/{}">
+                        <img class="round_icon" src={} style="float:left;">
+                        </a>
+                        <div class="title">
+                        <a class="name">{}</a>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <p  class="abstract" style="margin-left: 80px;">
+                                {}
+                            </p>
+                            </div>
+                            <div class="meta">
+                                <span style="margin-left: 20px" class="flask-moment" data-timestamp="{}" data-format="fromNow(0)" data-refresh="0">{}</span>
+                            </div>
+                        </div>
+                    </li>"""
+
+        image_url = "/show_image/{}".format(info.launch_id)
+        lauch_name = User.query.filter_by(id=info.launch_id).first_or_404().username
+        update_time = str(info.time)
+        html = html.format(info.id, info.launch_id, image_url, lauch_name, info.info, update_time, update_time)
+        item = dict()
+        item['html'] = html
+        item['id'] = info.id
+        info_html_list.append(item)
+    return json.dumps(info_html_list)
 
 
 @user.route("/get_comment", methods=['GET', 'POST'])
@@ -263,7 +300,7 @@ def get_comment():
     key = int(request.args['key'])
     _id = int(request.args['_id'])
     tmp = Category.query.join(Comment, Category.id == Comment.post_id).filter(Category.user == key).order_by(
-        Comment.timestamp.desc())
+        Comment.timestamp.asc())
     length = len(tmp.all())
     target_page_num = 5
     page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
@@ -278,7 +315,7 @@ def get_comment():
                             </a>
                             <div style="margin-top: 20px;" class="container">
                                 <a class="title" target="_blank" href="/display/{}">{}</a>
-                                <p  class="abstract" style="cursor:pointer" onclick="window.location='/display/{}';">
+                                <p  class="abstract" style="cursor:pointer" onclick="window.location='/display/{}#post-tabs';">
                                     {}
                                 </p>
                                 </div>

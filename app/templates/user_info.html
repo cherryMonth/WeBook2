@@ -79,6 +79,21 @@
             width: 100px;
         }
 
+        .user-unfollow-button.off {
+            float: right;
+            margin: 23px 200px 23px 16px;
+            border: 1px solid hsla(0, 0%, 59%, .6);
+            font-size: 15px;
+            color: #8c8c8c;
+            background-color: white;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: 400;
+            line-height: normal;
+            padding: 8px 0;
+            width: 100px;
+        }
+
         .btn-hollow {
             float: right;
             margin: 23px 50px 23px 16px;
@@ -161,6 +176,56 @@
             line-height: 1.5;
         }
 
+        .mask {
+            margin: 0;
+            padding: 0;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: #333;
+            opacity: 0.6;
+            filter: alpha(opacity=60);
+            z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        .form {
+            position: absolute;
+            left: 30%;
+            background: white;
+            width: 700px;
+            height: 500px;
+            border: 3px solid #444;
+            border-radius: 7px;
+            z-index: 10000;
+            display: none;
+        }
+
+        .row1 {
+            background: #f7f7f7;
+            padding: 0px 20px;
+            line-height: 50px;
+            height: 50px;
+            font-weight: bold;
+            color: #666;
+            font-size: 20px;
+        }
+
+        #_submit {
+            color: White;
+            background: #4490f7;
+            text-decoration: none;
+            padding: 10px 95px;
+            margin-top: 40px;
+            border-radius: 5px;
+            opacity: 0.8;
+            margin-left: 35%;
+            filter: alpha(opacity=80);
+        }
+
         @font-face {
             font-family: 'Glyphicons Halflings';
             src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot');
@@ -177,12 +242,19 @@
         {{ super() }}
     {% endblock navbar %}
     {% block message %}
+        <script>
+            function close_flash() {
+                var btn = document.getElementById('flash');
+                btn.style.display = 'none';
+            }
+        </script>
         <div class="container" id="flash" style="text-align:center;margin-top:1%">
             <div class="row clearfix">
                 {% for message in get_flashed_messages(with_categories=True) %}
                     {% if message[1] != 'Please log in to access this page.' %}
                         <div class="alert alert-{{ message[0] }}">
-                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            <button type="button" class="close" data-dismiss="alert" onclick="close_flash()">&times;
+                            </button>
                             {{ message[1] }}
                         </div>
                     {% endif %}
@@ -192,18 +264,45 @@
     {% endblock message %}
 
     {% block content %}
+        <script>
+            function begin(self) {
+                $("body").append("<div id='mask'></div>");
+                $("#mask").addClass("mask").fadeIn("slow");
+                $("#form" + self.id).fadeIn("slow");
+                var form = document.getElementsByClassName("form");
+                for (var f = 0; f < form.length; f++) {
+                    if (form[f].id !== "form" + self.id)
+                        form[f].style.display = 'none';
+                }
+            }
+
+            function close_btn(self) {
+                $("#" + self).fadeOut("slow");
+                $("#mask").css({display: 'none'});
+            }
+        </script>
         <div id="user_info" class="container">
             <a class="avatar" href="{{ url_for('main.user_information', key=user.id) }}">
                 <img src="/show_image/{{ user.id }}" class="round_icon" style="float:left"></a>
-            <button data-v-test class="off user-follow-button">
-                <i data-v-test class="iconfont">
-                </i>
-                <span data-v-test>关注</span>
+            <button data-v-test
+                    onclick="{% if not current_user.is_anonymous and user.is_followed_by(current_user) %}
+                        window.location.href='/unfollowed_user/{{ user.id }}'" class='off user-unfollow-button'
+                    {% else %}
+                    window.location.href='/followed_user/{{ user.id }}'" class='off user-follow-button'
+                    {% endif %}
+            >
+            <i data-v-test class="iconfont">
+            </i>
+            {% if not current_user.is_anonymous and user.is_followed_by(current_user) %}
+                <a style="color: #8c8c8c;">取消关注</a>
+            {% else %}
+                <a style="color: white;">关注</a>
+            {% endif %}
             </button>
-            <button data-v-test class="btn-hollow">
+            <button data-v-test class="btn-hollow" href="#form{{ user.id }}" id={{ user.id }} onclick="begin(this)">
                 <i data-v-test class="iconfont">
                 </i>
-                <span data-v-test>发私信</span>
+                <a class="span">发私信</a>
             </button>
             <div id="info" class="info">
                 <div class="title">
@@ -227,7 +326,7 @@
                     <li class="li">
                         <div class="meta-block">
                             <a href="#"><p>{{ category }}</p>
-                                <i class="iconfont ic-arrow">文章></i>
+                                <i class="iconfont ic-arrow">文章</i>
                             </a>
                         </div>
                     </li>
@@ -241,13 +340,29 @@
                     <li class="li">
                         <div class="meta-block">
                             <a><p>{{ collect_num }}</p>
-                                <i class="iconfont ic-arrow">文章收藏数</i>
+                                <i class="iconfont ic-arrow">喜欢</i>
                             </a>
                         </div>
                     </li>
                 </ul>
             </div>
         </div>
+        <form action="{{ url_for('user.send_info', key=user.id) }}" class="form" method="post"
+              id="form{{ user.id }}" style="display: none;margin-top: 20px;">
+
+            <div class="row1">
+                发送私信给{{ user.username }}...
+                <a href="#form{{ user.id }}" style="float: right" title="关闭窗口"
+                   onclick="close_btn('form{{ user.id }}')">×</a>
+            </div>
+            <div>
+                                        <textarea style="margin-left:7%;width: 600px;height: 300px;" name="text"
+                                                  placeholder="发送您的信息吧..."></textarea>
+            </div>
+            <div class="row">
+                <input type="submit" id="_submit" class="submit"/>
+            </div>
+        </form>
         <ul class="container" data-pjax-container="#list-container">
             <li id="category" onclick="f1(this)" class="songjian active li" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
     font-size: 15px;
@@ -280,7 +395,7 @@
         <div style="float: right">
             <a href="#" id="toTop" title="点击移动到顶部!"
                style="display: block;bottom: 100px;margin-right: 100px;height: 40px;"><span id="toTopHover"
-                                                                                           style="opacity: 0;"></span></a>
+                                                                                            style="opacity: 0;"></span></a>
         </div>
         <script src="/static/js/jquery-1.11.1.min.js"></script>
         <script src="/static/js/moment-with-locales.min.js"></script>
@@ -293,6 +408,7 @@
                 type: "POST",
                 dataType: "json",
                 success: function (data) {
+                    console.log('send');
                     f(data);
                 }
             });
@@ -301,12 +417,14 @@
                 var documentH = $(document).height();//整个网页的高度（包括未显示的部分）
                 var scrollH = $(window).scrollTop();//滚动条滚动上去的高度
                 //或者  scrollH = $(document).scrollTop();
+                console.log(windowH + scrollH >= documentH);
                 if (windowH + scrollH >= documentH) {
                     $.ajax({
                         url: "/" + window.page + "?key={{ user.id }}&_id=" + window.num,
                         type: "POST",
                         dataType: "json",
                         success: function (data) {
+                            console.log('send');
                             f(data);
                         }
                     });
@@ -326,6 +444,7 @@
                             type: "POST",
                             dataType: "json",
                             success: function (data) {
+                                console.log('send');
                                 f(data);
                             }
                         });
@@ -359,6 +478,7 @@
             });
 
             function f(data_list) {
+                console.log('get it')
                 if (data_list.length === 0) {
                     alert("我也是有底线的！");
                     return 0;

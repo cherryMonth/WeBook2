@@ -128,7 +128,7 @@
                     {% else %}
                     <a href="/followed_user/{{ user.id }}">关注此用户</a>
                     {% endif %}
-                    <a href="/my_doc/{{ user.id }}/1" style="margin-left: 10%;">ta的首页</a>
+                    <a href="{{ url_for("main.user_information", key=user.id) }}" style="margin-left: 10%;">ta的首页</a>
                     <a href="#form{{ user.id }}" id={{ user.id }} onclick="begin(this)"
                        style="margin-left: 10%;">发送私信</a></h4>
 

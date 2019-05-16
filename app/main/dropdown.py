@@ -1,19 +1,16 @@
-from flask import render_template, redirect, flash, url_for, request, abort
-from flask import Blueprint, current_app, send_from_directory
-import os
+from flask import request
+from flask import Blueprint
+from flask_login import current_user
 import re
 from app.main.parse import Extractor
 import markdown
+from sqlalchemy.sql import func
 from app.main.models import Category, Comment
-from app.main.forms import FindUser
-from app.main.models import User, Information
-from app import db
-from werkzeug.utils import secure_filename
-from flask_login import login_required, current_user
-from sqlalchemy import text
+from app.main.models import User
 import json
 
 dropdown = Blueprint("dropdown", __name__)
+
 
 @dropdown.route("/get_index_page", methods=['GET', 'POST'])
 def get_index_page():
@@ -64,3 +61,64 @@ def get_index_page():
         item['id'] = doc.id
         docs_html_list.append(item)
     return json.dumps(docs_html_list)
+
+
+@dropdown.route("/get_author_list", methods=['GET', 'POST'])
+def get_author_list():
+    key = [1, 2]
+    author_json_list = list()
+    for k in key:
+        html = """
+            <a class="avatar" href="/user_information/{}">
+                <img src="/show_image/{}" class="round_icon" style="float:left"></a>
+                <div id="info" class="info">
+                <div class="title">
+                    <a class="name">{}</a>
+                </div>
+                <ul>
+                    <li class="li">
+                        <div class="meta-block">
+                            <a><p>{}</p>
+                                <i class="iconfont ic-arrow">字数</i>
+                            </a>
+                        </div>
+                    </li>
+                    <li class="li">
+                        <div class="meta-block">
+                            <a><p>{}</p>
+                                <i class="iconfont ic-arrow">喜欢</i>
+                            </a>
+                        </div>
+                    </li>
+                    <button data-v-test="" class="off {}" onclick="window.location.href='{}'
+        
+                    ">
+                <i data-v-test="" class="iconfont">
+                </i>
+                <span style="color:{}">{}</span>
+                </button>
+                </ul>
+            </div>
+        </div>"""
+        author = dict()
+        author_instance = User.query.filter_by(id=k).first()
+        author['name'] = author_instance.username
+        author['id'] = k
+        categories = Category.query.filter_by(user=k).all()
+        word_count = sum(map(lambda x: len(x.content), categories))
+        author['word_count'] = word_count
+        collect_num = Category.query.filter_by(id=k).with_entities(func.sum(Category.collect_num)).first()[0] or 0
+        author['collect_num'] = collect_num
+        if not current_user.is_anonymous and author_instance.is_followed_by(current_user):
+            url = "/unfollowed_user/{}".format(k)
+            string = "取消关注"
+            color = "#8c8c8c"
+            _class = "user-unfollow-button"
+        else:
+            url = "/followed_user/{}".format(k)
+            string = "关注"
+            _class = "user-follow-button"
+            color = "white"
+        author_json_list.append(
+            html.format(k, k, author['name'], author['word_count'], author['collect_num'], _class, url, color, string))
+    return json.dumps(author_json_list)

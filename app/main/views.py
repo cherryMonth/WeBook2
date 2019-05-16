@@ -5,7 +5,6 @@ from flask import Blueprint, current_app, session
 from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword
 from flask_login import login_required, current_user
 from app import db
-from functools import reduce
 from werkzeug.utils import secure_filename
 from app.main.models import Category, Favorite, User, Comment, Topic, Information
 import datetime
@@ -120,9 +119,9 @@ def user_information(key):
     follow = len(user.followed.all())  # 关注人数
     fans = len(user.followers.all())  # 粉丝人数
     category = len(user.categories.all())
-    categories = Category.query.filter_by(user=key).all()
-    word_count = sum(map(lambda x:len(x.content), categories))
-    collect_num = Category.query.filter_by(id=key).with_entities(func.sum(Category.collect_num)).first()[0] or 0
+    categories = Category.query.filter_by(user=key)
+    word_count = sum(map(lambda x:len(x.content), categories.all()))
+    collect_num = categories.with_entities(func.sum(Category.collect_num)).first()[0] or 0
     return render_template("user_info.html", user=user, follow=follow, fans=fans, category=category,
                            word_count=word_count, collect_num=collect_num)
 

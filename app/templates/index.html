@@ -28,6 +28,97 @@
         <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.css.map">
         <script type="text/javascript" src="/static/js/modernizr-2.6.2.min.js"></script>
         <style>
+            .round_icon {
+                width: 50px;
+                height: 50px;
+                display: flex;
+                border-radius: 50%;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                margin-top: 15px;
+            }
+
+            .info {
+                margin-top: 5px;
+                padding-left: 80px;
+                font-size: 14px;
+            }
+
+            .user-unfollow-button.off {
+                float: right;
+                font-size: 15px;
+                border: 1px solid hsla(0,0%,59%,.6);
+                color: #8c8c8c;
+                background-color: white;
+                text-align: center;
+                border-radius: 40px;
+                font-weight: 400;
+                line-height: normal;
+                padding: 8px 0;
+                width: 100px;
+            }
+
+            .title .name {
+                display: inline;
+                font-size: 21px;
+                font-weight: 700;
+                font-family: Georgia, Times New Roman, Times, Songti SC, serif;
+                vertical-align: middle;
+                margin: -7px 0 4px;
+                line-height: 1.5;
+            }
+
+            ul .meta-block {
+                font-size: 12px;
+                margin: 0 3px 6px 0;
+                padding: 0 7px 0 0;
+                border-right: 1px solid #f0f0f0;
+            }
+
+            .li {
+                float: left;
+                margin-left: 10px;
+                list-style-type: none;
+            }
+
+            .iconfont {
+                font-family: iconfont !important;
+                font-size: inherit;
+                font-style: normal;
+                font-weight: 400 !important;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            .user-follow-button.off {
+                float: right;
+                font-size: 15px;
+                color: #fff;
+                background-color: #42c02e;
+                text-align: center;
+                border-radius: 40px;
+                font-weight: 400;
+                border: 1px solid transparent;
+                line-height: normal;
+                padding: 8px 0;
+                width: 100px;
+            }
+
+            .btn-hollow {
+                float: right;
+                margin: 23px 50px 23px 16px;
+                font-size: 15px;
+                color: #42c02e !important;
+                text-align: center;
+                border-radius: 40px;
+                font-weight: 400;
+                border: 1px solid rgba(59, 194, 29, .7);
+                line-height: normal;
+                padding: 8px 0;
+                width: 100px;
+            }
+
             .line-limit-length {
                 width: 34em;
                 overflow: hidden;
@@ -80,7 +171,7 @@
             }
 
             .note-list .meta {
-                margin-left: 22%;
+                margin-left: 20%;
                 padding-right: 0 !important;
                 font-size: 12px;
                 font-weight: 400;
@@ -104,7 +195,8 @@
 {% endblock head %}
 
 {% block body %}
-
+    <script src="/static/js/jquery-1.11.1.min.js"></script>
+    <script src="/static/js/moment-with-locales.min.js"></script>
     {% block navbar %}
         <div class="demo-inner-content">
             <div class="header-w3-agileits">
@@ -117,7 +209,7 @@
                         <!-- navbar-header -->
                         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                             <ul class="nav navbar-nav">
-                                <li><a href="{{ url_for('dropdown.get_index_page', _id=1) }}">首页</a></li>
+                                <li><a href="{{ url_for('main.index') }}">首页</a></li>
                                 <li><a href="{{ url_for('main.find_file', key=7) }}">发现</a></li>
                                 <li><a href="{{ url_for('user.find_user') }}">关注</a></li>
                                 {% if not current_user.is_anonymous %}
@@ -166,8 +258,8 @@
     {% block message %}
         <script>
             function close_flash() {
-                var btn = document.getElementById('flash')
-                btn.style.display = 'none'
+                var btn = document.getElementById('flash');
+                btn.style.display = 'none';
             }
         </script>
         <div class="container" id="flash" style="text-align:center;">
@@ -184,7 +276,26 @@
             </div>
         </div>
     {% endblock message %}
+    <script>
+        function f2() {
+            $.ajax({
+                url: "/get_author_list",
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    f3(data);
+                }
+            });
+        }
 
+        f2();
+    </script>
+    <div style="float: right;margin-top: 5%;margin-right:100px">
+        <span style="text-align: left;">推荐作者</span>
+        <span style="margin-left: 120px;cursor:pointer" onclick="f2()">换一批</span>
+        <ul id="author_list">
+        </ul>
+    </div>
     <div style="width:50%;margin-left: 250px;"> <!-- 如果需要全屏则需要把class=container去掉 -->
         <div id="demo-1"
              data-zs-src='["/static/images/2.jpg", "/static/images/1.jpg", "/static/images/3.jpg","/static/images/4.jpg"]'
@@ -210,8 +321,6 @@
 
             </ur>
         </div>
-        <script src="/static/js/jquery-1.11.1.min.js"></script>
-        <script src="/static/js/moment-with-locales.min.js"></script>
         <script>
 
             window.num = 1;
@@ -294,6 +403,14 @@
                     startDelay: 100
                 });
             });
+
+            function f3(data_list) {
+                console.log(data_list);
+                document.getElementById("author_list").innerHTML = "";
+                for (index in data_list) {
+                    document.getElementById("author_list").innerHTML += data_list[index] + '<br><br><br>';
+                }
+            }
 
             function f(data_list) {
                 if (data_list.length === 0) {
