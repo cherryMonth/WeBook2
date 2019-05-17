@@ -65,7 +65,8 @@ def get_index_page():
 
 @dropdown.route("/get_author_list", methods=['GET', 'POST'])
 def get_author_list():
-    key = [1]
+    key = User.query.filter(User.id>0).all()
+    key = list(map(lambda x: x.id, key))
     author_json_list = list()
     for k in key:
         html = """

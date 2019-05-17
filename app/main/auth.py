@@ -92,7 +92,7 @@ def register():
         user.image_name = filename
         db.session.add(user)
         db.session.commit()
-        token = user.generate_confirmation_token()
+        token = str(user.generate_confirmation_token())
         send_email([user.email], u'验证您的账号',
                    'auth/email/confirm', user=user, token=token)
         flash(u"一封验证邮件发送到了你的邮箱,请您验收!", "success")

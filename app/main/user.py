@@ -3,6 +3,7 @@
 from flask import render_template, redirect, flash, url_for, request, abort
 from flask import Blueprint, current_app, send_from_directory
 import os
+import requests
 import re
 from app.main.parse import Extractor
 import markdown
@@ -219,8 +220,14 @@ def get_category():
                 </li>"""
         result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
     ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
-        result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
-        image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon", "image/vnd.microsoft.icon"]
+        tmp_url = None
+        for url in result:
+            response = requests.get(url[:-1])
+            if response.status_code == 200 and response.headers.get('Content-Type') in image_type:
+                tmp_url = url[:-1]
+                break
+        image_url = tmp_url or "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
         exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
                 'markdown.extensions.toc']
