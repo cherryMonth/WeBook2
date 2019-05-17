@@ -507,7 +507,7 @@ def add_comment(key):
         _info.time = datetime.datetime.utcnow()
         _info.launch_id = current_user.id
         category = Category.query.filter_by(id=key).first()
-        get_star = int(request.form['score'])
+        get_star = request.form.get('score') or 0
         if get_star != 0:
             if get_star == 1:
                 category.one_num += 1

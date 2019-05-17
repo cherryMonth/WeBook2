@@ -306,14 +306,19 @@ def follow_me():
 def get_comment():
     key = int(request.args['key'])
     _id = int(request.args['_id'])
-    tmp = Category.query.join(Comment, Category.id == Comment.post_id).filter(Category.user == key).order_by(
-        Comment.timestamp.asc())
-    length = len(tmp.all())
     target_page_num = 5
-    page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
-    if _id > page_num:
+    recent_doc_list = Category.query.from_statement(text("""select category.id, category.content, category.title, update_time, timestamp,  category.collect_num , category.rate
+from category, comment where category.id = comment.post_id and category.user = {} order by timestamp desc;""".format(key))).all()
+    cache = []
+    for t in recent_doc_list:
+        if t.id not in cache:
+            cache.append(t.id)
+        else:
+            recent_doc_list.remove(t)
+    if target_page_num * _id - target_page_num > len(recent_doc_list) - 1:
         return '[]'
-    recent_doc_list = tmp.paginate(_id, target_page_num, error_out=True).items
+
+    recent_doc_list = recent_doc_list[target_page_num * _id - target_page_num:target_page_num]
     docs_html_list = list()
     for doc in recent_doc_list:
         html = """<li id="{}" class="have-img">
