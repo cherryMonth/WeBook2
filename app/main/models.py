@@ -127,7 +127,7 @@ class Comment(db.Model):
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)  # 哪篇文章
     comment_user_id = db.Column(db.Integer)  # 被评论者 一般是不存在　当有人回复时是被回复者的id
-
+    comment_rate = db.Column(db.Integer, default=0)
     # disabled = db.Column(db.Boolean, default=False)  # 是否隐藏
 
 
@@ -140,6 +140,7 @@ class Category(db.Model):
     user = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(30), nullable=False)
     content = db.Column(db.Text(100000), nullable=False)
+    location = db.Column(db.Text(200), default='')
     update_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     collect_num = db.Column(db.Integer(), default=0, nullable=False)
     commented = db.relationship('Comment',  # 记录文章的评论数
@@ -148,7 +149,13 @@ class Category(db.Model):
                                 cascade='all, delete-orphan')
 
     disabled = db.Column(db.Boolean, nullable=False, default=False)
-    rate = db.Column(db.Float, default=0)
+    five_num = db.Column(db.Integer(), default=0)
+    four_num = db.Column(db.Integer(), default=0)
+    three_num = db.Column(db.Integer(), default=0)
+    two_num = db.Column(db.Integer(), default=0)
+    one_num = db.Column(db.Integer(), default=0)
+    rate = db.Column(db.Float(), default=0)
+
     favorite = db.relationship('Favorite',  # 关注这篇文章的人
                                foreign_keys=[Favorite.favorited_id],
                                backref=db.backref('favorited', lazy='joined'),

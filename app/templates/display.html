@@ -17,6 +17,158 @@
     <script src="{{ url_for('static',filename='editormd/lib/sequence-diagram.min.js') }}"></script>
     <script src="{{ url_for('static',filename='editormd/lib/flowchart.min.js') }}"></script>
     <script src="{{ url_for('static',filename='editormd/lib/jquery.flowchart.min.js') }}"></script>
+    <script src="https://cdn.bootcss.com/echarts/4.2.1-rc1/echarts-en.min.js"></script>
+    <style>
+        .star_bg {
+            width: 120px;
+            height: 20px;
+            background: url("/static/img/star.png") repeat-x;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .star {
+            height: 100%;
+            width: 24px;
+            line-height: 6em;
+            position: absolute;
+            z-index: 3;
+        }
+
+        .star:hover {
+            background: url("/static/img/star.png") repeat-x 0 -20px !important;
+            left: 0;
+            z-index: 2;
+        }
+
+        .r_star {
+            height: 100%;
+            width: 24px;
+            line-height: 6em;
+            position: absolute;
+            z-index: 3;
+        }
+
+        .star_1 {
+            left: 0;
+        }
+
+        .star_2 {
+            left: 24px;
+        }
+
+        .star_3 {
+            left: 48px;
+        }
+
+        .star_4 {
+            left: 72px;
+        }
+
+        .star_5 {
+            left: 96px;
+        }
+
+        .star_1:hover {
+            width: 24px;
+        }
+
+        .star_2:hover {
+            width: 48px;
+        }
+
+        .star_3:hover {
+            width: 72px;
+        }
+
+        .star_4:hover {
+            width: 96px;
+        }
+
+        .star_5:hover {
+            width: 120px;
+        }
+
+        .star_label {
+            display: block;
+            _display: inline;
+            height: 100%;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        /* 幕后的英雄，单选按钮 */
+        .score {
+            position: absolute;
+            clip: rect(0 0 0 0);
+        }
+
+        .score:checked + .star {
+            background: url("/static/img/star.png") repeat-x 0 -20px;
+            left: 0;
+            z-index: 1;
+        }
+
+        .score_1:checked ~ .star_1 {
+            width: 24px;
+        }
+
+        .score_2:checked ~ .star_2 {
+            width: 48px;
+        }
+
+        .score_3:checked ~ .star_3 {
+            width: 72px;
+        }
+
+        .score_4:checked ~ .star_4 {
+            width: 96px;
+        }
+
+        .score_5:checked ~ .star_5 {
+            width: 120px;
+        }
+
+        .star_bg:hover .star {
+            background-image: none;
+        }
+
+        /* for IE6-IE8 JS 交互 */
+        .star_checked {
+            background: url("/static/img/star.png") repeat-x 0 -20px;
+            left: 0;
+            z-index: 1;
+        }
+
+        #panel {
+            position: fixed;
+            background-color: white;
+            max-height: 90%;
+            overflow-y: auto;
+            top: 10px;
+            right: 10px;
+            width: 280px;
+        }
+
+        #panel .amap-call {
+            background-color: #009cf9;
+            border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        #panel .amap-lib-driving {
+            border-bottom-left-radius: 4px;
+            border-bottom-right-radius: 4px;
+            overflow: hidden;
+        }
+    </style>
+    <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
+    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
+    <script type="text/javascript"
+            src="https://webapi.amap.com/maps?v=1.4.14&key=ca421a52854417e5c65e84623d1c281f&plugin=AMap.Driving"></script>
+    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+
 {% endblock %}
 {% block title %} {{ post.title }} {% endblock title %}
 
@@ -41,8 +193,147 @@
     {% endblock message %}
 
     {% block content %}
+        <div style="float: left;margin-top: 5%;margin-left: 20px;"><p class="title name">WeBook评分{{ rate }}</p>
+            <p class="title name">{{ people_num }}人参与了评分</p>
+            <div id="main" style="width: 300px;height:200px;float: right;">
+            </div>
+            <p>地理位置: {{ location or '暂无' }}</p>
+            <button class="btn btn-hollow" onclick="f1(this)">显示导航地图</button>
+        </div>
+        <script>
+            var myChart = echarts.init(document.getElementById('main'));
+            myChart.title = '坐标轴刻度与标签对齐';
 
+            option = {
+                color: ['#3398DB'],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {            // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow'        // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [
+                    {
+                        type: 'category',
+                        data: ['5星', '4星', '3星', '2星', '1星'],
+                        axisTick: {
+                            alignWithLabel: true
+                        }
+                    }
+                ],
+                yAxis: [
+                    {
+                        type: 'value'
+                    }
+                ],
+                series: [
+                    {
+                        name: '百分比',
+                        type: 'bar',
+                        barWidth: '60%',
+                        data: {{ rate_list }}
+                    }
+                ]
+            };
+            myChart.setOption(option);
+        </script>
         <div class="container" style="display: block;">
+            <div id='father'>
+
+            </div>
+            <script>
+
+                function close() {
+
+                    document.getElementById('father').removeChild(document.getElementById('container'));
+                    document.getElementById('father').removeChild(document.getElementById('panel'));
+                }
+
+                function display() {
+                    {% if not location %}
+                        alert("该文章暂时不存在对应的物理地址!");
+                        return;
+                    {% endif %}
+                    var container = document.createElement('div');
+                    var panel = document.createElement('div');
+                    container.setAttribute('style', 'width: 1000px;height: 200px');
+                    container.setAttribute('id', 'container');
+                    panel.setAttribute('id', 'panel');
+                    document.getElementById('father').appendChild(container);
+                    document.getElementById('father').appendChild(panel);
+                    if (navigator.geolocation) {  //如果浏览器支持获取地理信息
+                        navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+                    } else {
+                        console.log("您的浏览器不支持地理定位");
+                    }
+
+                    function successCallback(position) {
+                        console.log("获取地理信息成功");
+                        window.wd = position.coords.latitude;  // 维度
+                        window.jd = position.coords.longitude;  // 经度
+                        $.ajax({
+                            url: "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" + window.jd + "," + window.wd + "&key=40913b5c086c2ef82192bbd0afff78b7&radius=1000&extensions=all",
+                            type: "GET",
+                            dataType: "json",
+                            success: function (data) {
+                                f(data);
+                            }
+                        });
+                        console.log("维度：" + wd + "    经度：" + jd);  // 可以通过百度地图API和经纬度获取具体信息
+                    }
+
+                    function errorCallback(error) {
+                        console.log("获取地理信息失败");  //没有给浏览器获取位置权限时，会执行errorCallback
+                        console.log(error);  // PositionError {code: 1, message: "User denied Geolocation"}
+                    }
+
+                    function f(target) {
+                        window.target = target;
+                        var map = new AMap.Map("container", {
+                            resizeEnable: true,
+                            center: [window.jd, window.wd],//地图中心点
+                            zoom: 13 //地图显示的缩放级别
+                        });
+                        //构造路线导航类
+                        var driving = new AMap.Driving({
+                            map: map,
+                            panel: "panel"
+                        });
+                        // 根据起终点名称规划驾车导航路线
+                        driving.search([
+
+                            {
+                                keyword: target['regeocode']['formatted_address'],
+                                city: target['regeocode']['addressComponent']['city']
+                            },
+                            {keyword: '{{location}}'}
+                        ], function (status, result) {
+                            // result 即是对应的驾车导航信息，相关数据结构文档请参考  https://lbs.amap.com/api/javascript-api/reference/route-search#m_DrivingResult
+                            if (status === 'complete') {
+                                log.success('绘制驾车路线完成')
+                            } else {
+                                log.error('获取驾车数据失败：' + result)
+                            }
+                        });
+                    }
+                }
+
+                function f1(hander) {
+                    if (hander.innerHTML === '显示导航地图') {
+                        hander.innerHTML = '取消显示地图';
+                        display();
+                    } else {
+                        hander.innerHTML = '显示导航地图';
+                        close();
+                    }
+                }
+            </script>
             <div class="markdown-body editormd-preview-container">
                 <div class="section-title" style="margin-bottom:5%">
                     <h2>{{ post.title }}</h2>
@@ -68,19 +359,31 @@
                     {% for comment in comments %}
                         <li class="post">
                             <div class="post-thumbnail">
-                                <a href="/my_doc/{{ comment.author_id }}/1">
+                                <a href="/user_information/{{ comment.author_id }}">
                                     <img class="img-rounded profile-thumbnail" src="/show_image/{{ comment.img }}"
                                          style="width: 40px;height: 40px;">
                                 </a>
+                                {% if comment.comment_rate != 0 %}
+                                    <div id="starBg{{ comment.id }}" class="star_bg"
+                                         style="margin-left: 50%;margin-top: 25px;margin-bottom: 20px;">
+                                        <input type="radio" checked id="starScore{{ comment.id }}"
+                                               class="score score_{{ comment.comment_rate }}"
+                                               value="{{ comment.comment_rate }}"
+                                               name="score_{{ comment.id }}">
+                                        <a class="star star_{{ comment.comment_rate }}"></a>
+                                    </div>
+                                {% endif %}
                             </div>
-                            <div class="post-content">
+                            <div class="post-content" style="margin-top: 3px;">
                                 <div class="post-date">{{ moment(comment.timestamp).fromNow() }}</div>
                                 <div class="post-author">
                                     {% if comment.comment_user %}
-                                        <a href="/my_doc/{{ comment.author_id }}/1">{{ comment.author }}</a>回复
-                                        <a href="/my_doc/{{ comment.comment_id }}/1">{{ comment.comment_user }}</a>:
+                                        <a href="/user_information/{{ comment.author_id }}">{{ comment.author }}</a>回复
+                                        <a href="/user_information/{{ comment.author_id }}">{{ comment.comment_user }}</a>
+                                        :
                                     {% else %}
-                                        <a href="/my_doc/{{ comment.author_id }}/1">{{ comment.author }}</a>
+                                        <a href="/user_information/{{ comment.author_id }}">{{ comment.author }}</a>
+
                                     {% endif %}
                                 </div>
                                 <div class="post-body" id="view_{{ comment.id }}">
@@ -134,7 +437,28 @@
         <div id="addcomment" style="display: none;">
             <hr style="width: 65%;">
             <form id="form" method="post" action="/add_comment/{{ post.id }}">
-                <div class="form-group">
+                <div class="form-group" style="">
+                    <div id="pingjia">
+                        <h2 class="name title" style="margin-left: 20%;">此处可以给出您的评分哟！</h2>
+                        <div id="starBg" class="star_bg" style="margin-left: 20%;margin-bottom: 20px;">
+                            <input type="radio" id="starScore1" class="score score_1" value="1" name="score">
+                            <a href="#starScore1" class="star star_1" title="差"><label class="star_label"
+                                                                                       for="starScore1">差</label></a>
+                            <input type="radio" id="starScore2" class="score score_2" value="2" name="score">
+                            <a href="#starScore2" class="star star_2" title="较差"><label class="star_label"
+                                                                                        for="starScore2">较差</label></a>
+                            <input type="radio" id="starScore3" class="score score_3" value="3" name="score">
+                            <a href="#starScore3" class="star star_3" title="普通"><label class="star_label"
+                                                                                        for="starScore3">普通</label></a>
+                            <input type="radio" id="starScore4" class="score score_4" value="4" name="score">
+                            <a href="#starScore4" class="star star_4" title="较好"><label class="star_label"
+                                                                                        for="starScore4">较好</label></a>
+                            <input type="radio" id="starScore5" class="score score_5" value="5" name="score">
+                            <a href="#5" class="star star_5" title="好"><label class="star_label"
+                                                                              for="starScore5">好</label></a>
+
+                        </div>
+                    </div>
                     <div id='comment'>
                         <textarea name="comment" class="editormd-markdown-textarea"></textarea>
                     </div>
@@ -218,6 +542,7 @@
                 var handler = document.getElementById("addcomment");
                 handler.setAttribute("style", "margin-top:20px;");
                 var btn = document.getElementById("remove");
+                document.getElementById('pingjia').setAttribute('style', "display: block")
                 btn.setAttribute("style", "float:right;margin-right: 3%;margin-top: 50px;float:right");
 
                 $(function () {
@@ -265,6 +590,7 @@
 
             function response_comment(key) {
                 addcomment();
+                document.getElementById('pingjia').setAttribute('style', "display:none");
                 form.setAttribute("action", "/response_comment/{{ post.id }}/" + key);
             }
 

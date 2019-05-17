@@ -44,7 +44,9 @@
                         {{ form.submit(class="btn btn-default submit", style="height:50px") }}
                     </div>
                 </div>
-
+                <div class="form-group" style="margin-left: 22.5%;">
+                    {{ form.location(class='form-control', style="width:50%;height:50px;font-size:20px;", maxlength="50") }}
+                </div>
                 <div class="form-group">
                     {{ form.text.label(style="margin-left:48%;margin-top:30px;font-size:40px;") }}
                     <div id="editormd" class="form-control">
@@ -106,15 +108,15 @@
                 dialogMaskBgColor: "#000",//设置透明遮罩层的背景颜色，全局通用，默认为#fff
                 codeFold: true,
                 imageUpload: true,
-                image : {
-                    title    : "添加图片",
-                    url      : "图片地址",
-                    link     : "图片链接",
-                    alt      : "图片描述",
-                    uploadButton     : "本地上传",
-                    imageURLEmpty    : "错误：图片地址不能为空。",
-                    uploadFileEmpty  : "错误：上传的图片不能为空。",
-                    formatNotAllowed : "错误：只允许上传图片文件，允许上传的图片文件格式有：jpeg, gif, png, bmp, webp!"
+                image: {
+                    title: "添加图片",
+                    url: "图片地址",
+                    link: "图片链接",
+                    alt: "图片描述",
+                    uploadButton: "本地上传",
+                    imageURLEmpty: "错误：图片地址不能为空。",
+                    uploadFileEmpty: "错误：上传的图片不能为空。",
+                    formatNotAllowed: "错误：只允许上传图片文件，允许上传的图片文件格式有：jpeg, gif, png, bmp, webp!"
                 },
                 imageFormats: ["jpg", "jpeg", "gif", "png", "bmp", "webp"],
                 imageUploadURL: "/upload_images",//注意你后端的上传图片服务地址
@@ -137,12 +139,10 @@
             if (handler.length > 0 || title.length > 0) {
                 if ($("#submit").attr("done") === undefined) {
                     return "Are you want exit?"
-                }
-                else {
+                } else {
                     return null;
                 }
-            }
-            else {
+            } else {
                 return null;
             }
         }
@@ -154,9 +154,7 @@
             if (Code.length === 0) {
                 alert("您输入正文的内容为空，无法提交!");
                 return false;
-            }
-
-            else if (Code.length > 100000) {
+            } else if (Code.length > 100000) {
                 alert('文档文本内容总长度为' + Code.length + '，当前最多只能存储为10000字，无法保存！');
                 return false;
             }

@@ -65,7 +65,7 @@ def get_index_page():
 
 @dropdown.route("/get_author_list", methods=['GET', 'POST'])
 def get_author_list():
-    key = [1, 2]
+    key = [1]
     author_json_list = list()
     for k in key:
         html = """
@@ -122,3 +122,4 @@ def get_author_list():
         author_json_list.append(
             html.format(k, k, author['name'], author['word_count'], author['collect_num'], _class, url, color, string))
     return json.dumps(author_json_list)
+

@@ -4,7 +4,7 @@
     {{ super() }}
 {% endblock metas %}
 
-{% block title %}个人主页{% endblock title %}
+{% block title %}个人关注{% endblock title %}
 
 {% block styles %}
     {{ super() }}
@@ -226,14 +226,6 @@
             filter: alpha(opacity=80);
         }
 
-        @font-face {
-            font-family: 'Glyphicons Halflings';
-            src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot');
-            src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/static/bootstrap/fonts/glyphicons-halflings-regular.woff') format('woff'),
-            url('/static/bootstrap/fonts/glyphicons-halflings-regular.ttf') format('truetype'),
-            url('/static/bootstrap/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
-        }
-
     </style>
 {% endblock %}
 
@@ -368,24 +360,13 @@
     font-size: 15px;
     font-weight: 700;
     color: #969696;
-    line-height: 25px;"><i class="iconfont ic-articles"></i> 文章</a>
+    line-height: 25px;"><i class="iconfont ic-articles"></i>关注用户</a>
             </li>
             <li id="dynamics" onclick="f1(this)" class="li songjian" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
     font-size: 15px;
     font-weight: 700;
     color: #969696;
-    line-height: 25px;"><i class="iconfont ic-feed"></i> 动态</a></li>
-            <li id="comment" onclick="f1(this)" class="li songjian" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #969696;
-    line-height: 25px;"><i class="iconfont ic-latestcomments"></i>
-                最新评论</a></li>
-            <li id="hot" class="li songjian" onclick="f1(this)" style="padding: 10px;"><a href="#" style="padding: 13px 20px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #969696;
-    line-height: 25px;"><i class="iconfont ic-hot"></i> 热门</a></li>
+    line-height: 25px;"><i class="iconfont ic-feed"></i> 粉丝</a></li>
         </ul>
         <div id="list-container">
             <ur class="note-list" id="note-list">

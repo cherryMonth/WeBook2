@@ -29,16 +29,16 @@ user_page = dict()
 
 
 def pop(args):
-    print (str(args[0]) + "has pop!")
+    print(str(args[0]) + "has pop!")
     user_page.pop(args[0], None)
 
 
 def work(_id, info):
-    print (_id + "begin work")
+    print(_id + "begin work")
     name = _id + ".md"
     pdf = _id + ".pdf"
     filename = file_dir + "/" + name
-    print (filename)
+    print(filename)
     pdf_name = file_dir + "/" + pdf
     _file = open(filename, "wb")
     line_list = info.split("\n")
@@ -86,6 +86,7 @@ def edit():
         p.title = form.title.data
         p.content = form.text.data
         p.user = current_user.id
+        p.location = form.location.data
         p.topic = 1
         p.update_time = datetime.datetime.utcnow()
         db.session.add(p)
@@ -98,7 +99,8 @@ def edit():
             db.session.add(info)
             db.session.flush()
             info.info = u"您关注的用户 " + current_user.username + u" 发表了新的文章 " + u"<a style='color: #d82433' " \
-                u"href='{}?check={}'>{}</a>".format(u"/display/" + str(p.id), info.id, p.title) + u"。"
+                                                                            u"href='{}?check={}'>{}</a>".format(
+                u"/display/" + str(p.id), info.id, p.title) + u"。"
         # t = threading.Thread(target=work, args=(str(p.id), p.content.encode("utf-8")))
         # t.start()
         db.session.commit()
@@ -120,7 +122,7 @@ def user_information(key):
     fans = len(user.followers.all())  # 粉丝人数
     category = len(user.categories.all())
     categories = Category.query.filter_by(user=key)
-    word_count = sum(map(lambda x:len(x.content), categories.all()))
+    word_count = sum(map(lambda x: len(x.content), categories.all()))
     collect_num = categories.with_entities(func.sum(Category.collect_num)).first()[0] or 0
     return render_template("user_info.html", user=user, follow=follow, fans=fans, category=category,
                            word_count=word_count, collect_num=collect_num)
@@ -146,6 +148,14 @@ def dispaly(key):
     if not p:
         flash(u'该文章不存在！', 'warning')
         abort(404)
+
+    star_list = [p.five_num, p.four_num, p.three_num, p.two_num, p.one_num]
+    people_num = sum(star_list)
+    if people_num == 0:
+        rate_list = [0, 0, 0, 0, 0]
+    else:
+        rate_list = list(map(lambda x: 1.0 * x / people_num * 100, star_list))
+
     comments = Comment.query.filter_by(post_id=key).all()
     for _index in range(len(comments)):
         comments[_index].author = User.query.filter_by(id=comments[_index].author_id).first().username
@@ -154,7 +164,7 @@ def dispaly(key):
         if comments[_index].comment_user_id or 0 > 0:
             comments[_index].comment_user = User.query.filter_by(id=comments[_index].comment_user_id).first().username
 
-    return render_template("display.html", post=p, is_collect=is_collect, comments=comments)
+    return render_template("display.html", post=p, is_collect=is_collect, comments=comments, rate=p.rate, people_num=people_num, rate_list=rate_list, location=p.location)
 
 
 @main.route("/cancel/<key>", methods=['GET', "POST"])
@@ -257,6 +267,7 @@ def edit_file(key):
         abort(404)
     form = PostForm(title=p.title, text=p.content)
     if request.method == "POST":
+        p.location = request.values.get('location')
         p.title = request.values.get("title")
         p.content = request.values.get("text")
         p.update_time = datetime.datetime.utcnow()
@@ -289,7 +300,7 @@ def downloader(key):
     popen = None
     if not user_page.has_key(str(p.id)):
         user_page[str(p.id)] = 'work'
-        print (str(p.id) + "begin work")
+        print(str(p.id) + "begin work")
         info = p.content.encode("utf-8")
         name = str(p.id) + ".md"
         pdf = str(p.id) + ".pdf"
@@ -335,7 +346,7 @@ def downloader(key):
         popen = subprocess.Popen(shlex.split(shell), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         IOLoop.instance().add_timeout(50, callback=pop, args=(str(p.id),))
     else:
-        print ("have one working")
+        print("have one working")
     count = 0
 
     while True:
@@ -350,7 +361,7 @@ def downloader(key):
             if popen and popen.poll() is None:
                 line = popen.stdout.readline()
                 line += popen.stderr.readline()
-                print (line)
+                print(line)
                 if 'Error' in line or 'Warning' in line or "Could not" in line or 'WARNING' in line:
                     popen.terminate()
                     flash(u'导出失败, {}'.format(line), 'warning')
@@ -364,10 +375,10 @@ def downloader(key):
 def find_file(key):
     form = FindFile()
     if key == 7:
-        hot_doc_list = Category.query.from_statement(text("SELECT * FROM markdown.category where DATE_SUB(CURDATE(), "
+        hot_doc_list = Category.query.from_statement(text("SELECT * FROM webook.category where DATE_SUB(CURDATE(), "
                                                           "INTERVAL 7 DAY) <= date(update_time) ORDER BY collect_num desc,update_time desc  LIMIT 10 ;")).all()
     else:
-        hot_doc_list = Category.query.from_statement(text("SELECT * FROM markdown.category ORDER BY "
+        hot_doc_list = Category.query.from_statement(text("SELECT * FROM webook.category ORDER BY "
                                                           "collect_num desc,update_time desc LIMIT 10 ;")).all()
     for doc in hot_doc_list:
         doc.username = User.query.filter_by(id=doc.user).first().username
@@ -424,11 +435,11 @@ def edit_basic():
         # filter 支持表达式 比 filter 更强大
         temp = User.query.filter_by(username=form.username.data).first()
         if temp is form.username.data and current_user.username != form.username.data:
-            print (User.query.filter_by(username=form.username.data).first())
-            print (current_user.username)
-            print (form.username.data)
-            print (current_user.username != form.username.data)
-            print (current_user.username is form.username.data)
+            print(User.query.filter_by(username=form.username.data).first())
+            print(current_user.username)
+            print(form.username.data)
+            print(current_user.username != form.username.data)
+            print(current_user.username is form.username.data)
             flash(u"该用户名已经被注册过，请重新输入!", "warning")
             return redirect(url_for("main.edit_basic"))
 
@@ -447,7 +458,7 @@ def edit_basic():
                     os.makedirs(dirname)
                     _file.save(os.path.join(dirname, current_user.image_name))
                 except Exception as e:
-                    print (e)
+                    print(e)
             else:
                 _file.save(os.path.join(dirname, current_user.image_name))
 
@@ -496,11 +507,28 @@ def add_comment(key):
         _info.time = datetime.datetime.utcnow()
         _info.launch_id = current_user.id
         category = Category.query.filter_by(id=key).first()
+        get_star = int(request.form['score'])
+        if get_star != 0:
+            if get_star == 1:
+                category.one_num += 1
+            elif get_star == 2:
+                category.two_num += 1
+            elif get_star == 3:
+                category.three_num += 1
+            elif get_star == 4:
+                category.four_num += 1
+            elif get_star == 5:
+                category.five_num += 1
+            num = sum([category.five_num, category.four_num, category.three_num, category.two_num, category.one_num])
+            category.rate = 5.0 * category.five_num / num + 4.0 * category.four_num / num + 3.0 * category.three_num / num + 2.0 * category.two_num / num + 1.0 * category.one_num / num
+            db.session.add(category)
+        comment.comment_rate = get_star
         _info.receive_id = category.user
         db.session.add(_info)
         db.session.flush()
         _info.info = u"用户" + current_user.username + u" 对您的文章" + u"<a style='color: #d82433' " \
-            u"href='{}?check={}'>{}</a>".format(u"/display/" + str(category.id), _info.id, category.title) + u"进行了评论!"
+                                                                 u"href='{}?check={}'>{}</a>".format(
+            u"/display/" + str(category.id), _info.id, category.title) + u"进行了评论!"
         db.session.add(_info)
         db.session.add(comment)
         db.session.commit()
@@ -525,7 +553,8 @@ def edit_comment(key):
         db.session.add(_info)
         db.session.flush()
         _info.info = u"用户" + current_user.username + u" 对您的文章" + u"<a style='color: #d82433' " \
-            u"href='{}?check={}'>{}</a>".format(u"/display/" + str(category.id), _info.id, category.title) + u"修改了评论!"
+                                                                 u"href='{}?check={}'>{}</a>".format(
+            u"/display/" + str(category.id), _info.id, category.title) + u"修改了评论!"
         db.session.add(_info)
         comment.timestamp = datetime.datetime.utcnow()
         db.session.add(comment)
@@ -553,8 +582,9 @@ def response_comment(post_id, key):
         db.session.add(comment)
         db.session.flush()
         _info.info = u"用户" + current_user.username + u" 对您在" + u"<a style='color: #d82433' " \
-            u"href='{}?check={}'>{}</a>".format(u"/display/" + str(category.id), _info.id, category.title) + \
-            u"的评论进行了回复!"
+                                                               u"href='{}?check={}'>{}</a>".format(
+            u"/display/" + str(category.id), _info.id, category.title) + \
+                     u"的评论进行了回复!"
 
         db.session.commit()
         flash(u"回复成功!", "success")

@@ -1,5 +1,3 @@
-import sys
-import urllib3
 import re
 
 
@@ -40,6 +38,8 @@ class Extractor(object):
             charset = match.group(1).lower()
             if charset.find('gb') == -1:
                 self.isCharsetGB = False
+        else:
+            self.isCharsetGB = False
 
     def preProcess(self, doc):
         doc = self.reDATA.sub('', doc)
@@ -59,6 +59,7 @@ class Extractor(object):
             if line:
                 line = self.reSpace.sub('', line)
             self.textLines.append(line)
+        return ''.join(self.textLines)
 
     # Calculate the length of every block
     def calcBlockLens(self):
@@ -67,7 +68,7 @@ class Extractor(object):
         blockSize = min([textLinesCnt, self.blockSize])
         for i in range(blockSize):
             blockLen = blockLen + len(self.textLines[i])
-        self.blocksLen.append(blockLen)
+            self.blocksLen.append(blockLen)
 
         if (blockSize != self.blockSize):
             return
@@ -86,40 +87,20 @@ class Extractor(object):
         preProcDoc = self.preProcess(data)
         # f = open('dump')
         # preProcDoc = f.read()
-        self.getTextLines(preProcDoc)
-        self.calcBlockLens()
-
-        i = maxTextLen = 0
-        blocksCnt = len(self.blocksLen)
-        curTextLen = 0
-        part = ''
-        while i < blocksCnt:
-            if self.blocksLen[i] > 0:
-                if self.textLines[i]:
-                    part = '%s%s\n' % (part, self.textLines[i])
-                    curTextLen += len(self.textLines[i])
-            else:
-                curTextLen = 0
-                part = ''
-            if curTextLen > maxTextLen:
-                self.text = part
-                maxTextLen = curTextLen
-            i += 1
+        self.text = self.getTextLines(preProcDoc)
 
         if self.isCharsetGB:
             try:
+                print(self.text)
                 self.text = self.text.decode('gb2312').encode('utf-8')
             except Exception:
+                print('error')
                 pass
         return self.text
 
 
 if __name__ == '__main__':
-    ext = Extractor(1)
-    html = """<p><img alt="" src="https://upload-images.jianshu.io/upload_images/755327-48c8c7e8b27ff693.jpeg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000/format/webp" />
-终于放晴了。
-早上看到朋友圈的时候，清一色的蓝天白云美照，大部分人都觉得摆脱了雨天是一件极其美好的事情。
-拥抱晴天，尤其是这样的寒冷冬天实在是常规操作。对于很多爱摄影的朋友来说，也觉得晴天可以外出，可以拍出美美的照片，随便一张蓝天白云就可以引爆朋友圈。
-然而，今天我想告诉你的是下雨天也是很美好的时光，一样可以拍出美美的照片，而且逼格更高呢。
-那么，雨天拍照应该怎么拍呢？</p>"""
+    ext = Extractor(3)
+    html = """<p><img alt="" src="https://upload-images.jianshu.io/upload_images/6551115-aace0a7317cd6bb8.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1000/format/webp" /></p>
+    <p>今天不用早起，孩子们都在睡觉，我和先生八点多起来，简单吃过早餐后他看新闻，我开始整理床头和书柜里的部分书籍，准备把一些书带回榆林去。每收拾一本都会勾起一些回忆，我拿起给先生一一介绍着。有些是在书店甚至是街边的书摊上淘到的，有些是网购，还有些是朋友和大学舍友送的……2013年，大宝考入工大附中读高中，全家全力以赴支持，三月份刚办了退休手续的老爸和老妈负责大宝全部后勤，我和先生榆林西安两边跑。大宝小宝都是我一手带大的，孩子们有些依赖我，自然是我来回跑得多，基本是一半时间在榆林一半时间在西安，高三后半学期开始全程陪读。这些书就是2013年后半学期开始陆陆续续来到我和大宝身边的。大宝因为时间关系，只能读一小部分课外书。《黄帝内经》养生之类的是先生在读，其他的基本都是我的。我属于“杂读”型，除了《本草纲目》这些特别专业的不读之外，无论是大宝的少年版还是典藏版我都读。小宝来了我会给她读读《小王子》和《老人与海》，其他的她不感兴趣。</p>"""
     print(ext.getPlainText(html))

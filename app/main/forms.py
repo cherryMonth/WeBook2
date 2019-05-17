@@ -7,6 +7,7 @@ from app.main.models import Category
 
 class PostForm(FlaskForm):
     title = StringField("", render_kw={'placeholder': u'主题(仅限于30字内...)'})
+    location = StringField("", render_kw={'placeholder': u'地理位置(仅限于50字内...可选)'})
     text = TextAreaField("", [DataRequired(), Length(max=10000)])
     categories = SelectMultipleField('Categories', coerce=int)
     submit = SubmitField(u"发布文章")

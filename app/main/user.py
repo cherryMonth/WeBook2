@@ -23,7 +23,7 @@ def find_user():
     form = FindUser()
 
     hot_user_list = User.query.from_statement(
-        text("SELECT * FROM markdown.users ORDER BY collect_num DESC LIMIT 5 ;")).all()
+        text("SELECT * FROM webook.users ORDER BY collect_num DESC LIMIT 5 ;")).all()
 
     if form.validate_on_submit():
         user_list = User.query.whoosh_search(form.input.data).all()
@@ -119,22 +119,6 @@ def del_info(key, page):
         db.session.delete(info)
         db.session.commit()
     return redirect(url_for("user.information", page=page))
-
-
-@user.route("/my_follow", methods=['GET', 'POST'])
-@login_required
-def my_follow():
-    users = current_user.followed
-    user_list = [User.query.filter_by(id=_user.followed_id).first() for _user in users]
-    return render_template("edit/edit_my_follow.html", user_list=user_list)
-
-
-@user.route("/follow_my", methods=['GET', 'POST'])
-@login_required
-def follow_me():
-    users = current_user.followers
-    user_list = [User.query.filter_by(id=_user.follower_id).first() for _user in users]
-    return render_template("edit/edit_follow_me.html", user_list=user_list)
 
 
 @user.route("/get_user_info/", methods=['GET', 'POST'])
@@ -240,7 +224,7 @@ def get_category():
 
         exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
                 'markdown.extensions.toc']
-        ext = Extractor(1)
+        ext = Extractor(0)
         content = ext.getPlainText(markdown.markdown(doc.content, extensions=exts))[:75] + "..."
         update_time = str(doc.update_time)
         comment_num = len(Comment.query.filter_by(post_id=doc.id).all())
@@ -293,6 +277,22 @@ def get_dynamics():
         item['id'] = info.id
         info_html_list.append(item)
     return json.dumps(info_html_list)
+
+
+@user.route("/my_follow", methods=['GET', 'POST'])
+@login_required
+def my_follow():
+    users = current_user.followed
+    user_list = [User.query.filter_by(id=_user.followed_id).first() for _user in users]
+    return render_template("edit/edit_my_follow.html", user_list=user_list)
+
+
+@user.route("/follow_my", methods=['GET', 'POST'])
+@login_required
+def follow_me():
+    users = current_user.followers
+    user_list = [User.query.filter_by(id=_user.follower_id).first() for _user in users]
+    return render_template("edit/edit_follow_me.html", user_list=user_list)
 
 
 @user.route("/get_comment", methods=['GET', 'POST'])

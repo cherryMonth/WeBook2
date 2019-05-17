@@ -203,7 +203,7 @@
                 <div class="inner-header-agile">
                     <nav class="navbar navbar-default">
                         <div class="navbar-header">
-                            <h1><a href="{{ url_for('dropdown.get_index_page', _id=1) }}"><span>W</span>e<span>B</span>ook</a>
+                            <h1><a href="{{ url_for('main.index') }}"><span>W</span>e<span>B</span>ook</a>
                             </h1>
                         </div>
                         <!-- navbar-header -->
@@ -230,7 +230,6 @@
                                                         <li><a href="/user_information/{{ current_user.id }}">我的主页</a>
                                                         </li>
                                                         <li><a href="{{ url_for('main.show_collect') }}">收藏的文章</a></li>
-                                                        <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
                                                         <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
                                                     </ul>
                                                 </div>
@@ -382,11 +381,11 @@
             $(document).ready(function () {
                 $(".dropdown").hover(
                     function () {
-                        $('.dropdown-menu', this).stop(true).slideDown("fast");
+                        {#$('.dropdown-menu', this).stop(true).slideDown("fast");#}
                         $(this).toggleClass('open');
                     },
                     function () {
-                        $('.dropdown-menu', this).stop(true).slideUp("fast");
+                        {#$('.dropdown-menu', this).stop(true).slideUp("fast");#}
                         $(this).toggleClass('open');
                     }
                 );
