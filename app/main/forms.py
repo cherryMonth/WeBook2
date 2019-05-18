@@ -1,5 +1,5 @@
 # coding=utf-8
-from wtforms import StringField, TextAreaField, SelectMultipleField, SubmitField, PasswordField, BooleanField, FileField
+from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, SubmitField, PasswordField, BooleanField, FileField
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Length
 from app.main.models import Category
@@ -12,12 +12,14 @@ class PostForm(FlaskForm):
     categories = SelectMultipleField('Categories', coerce=int)
     submit = SubmitField(u"发布文章")
 
-    def __init__(self, title="", text=""):
+    def __init__(self, title="", text="", location=""):
         super(PostForm, self).__init__()
         if title:
             self.title.data = title
         if text:
             self.text.data = text
+        if location:
+            self.location.data = location
         self.categories.choices = [(c.id, c.title) for c in Category.query.order_by('id')]
 
 
@@ -37,6 +39,25 @@ class LoginForm(FlaskForm):
     password = PasswordField(u'密码')
     remember_me = BooleanField(u'保持登录')
     submit = SubmitField(u'登录')
+
+
+class CreateTopic(FlaskForm):
+    topic_name = StringField(u'主题名称', validators=[DataRequired()], render_kw={'placeholder': u'输入您想创建的主题...'})
+    filename = FileField(u"主题图片",  validators=[DataRequired()])
+    topic_info = TextAreaField(u"主题简介",  validators=[DataRequired()])
+    topic_id = SelectField('主题类型', coerce=int,  validators=[DataRequired()])
+    submit = SubmitField(u'创建')
+
+    def __init__(self, topic_name="", filename="", topic_info=""):
+        super(CreateTopic, self).__init__()
+        if topic_name:
+            self.topic_name = topic_name
+        if filename:
+            self.topic_name = topic_name
+        if topic_info:
+            self.topic_info = topic_info
+        self.topic_id.choices = [(0, "国内主题"), (1,"国外主题"), (2, "特色主题")]
+
 
 
 class RegisterForm(FlaskForm):

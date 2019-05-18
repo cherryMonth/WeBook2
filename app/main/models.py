@@ -59,29 +59,9 @@ class TopicMember(db.Model):  # 专题小组
     topic_id = db.Column(db.Integer(), db.ForeignKey('topic.id'), nullable=False)
     topic_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
     user_type = db.Column(db.Integer())  # 0 普通用户
-                                         # 1 成员用户
-                                         # 2 管理员用户
-                                         # 3 超级管理员
-
-
-class Topic(db.Model):
-    __tablename__ = 'topic'
-
-    id = db.Column(db.Integer(), primary_key=True, nullable=False)
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
-    type_id = db.Column(db.Integer, nullable=False)
-    topic_name = db.Column(db.String(64), unique=True)
-    topic_member = db.relationship('TopicMember',  # 专题对应的小组
-                               foreign_keys=[TopicMember.topic_id],
-                               backref=db.backref('topic', lazy='joined'),
-                               lazy='dynamic',
-                               cascade='all, delete-orphan')
-
-    category = db.relationship('TopicMember',  # 专题对应的小组
-                               foreign_keys=[TopicMember.topic_id],
-                               backref=db.backref('category', lazy='joined'),
-                               lazy='dynamic',
-                               cascade='all, delete-orphan')
+    # 1 成员用户
+    # 2 管理员用户
+    # 3 超级管理员
 
 
 class ScenicSpot(db.Model):
@@ -91,7 +71,6 @@ class ScenicSpot(db.Model):
     name = db.Column(db.String(64), unique=True)
     rate = db.Column(db.Float(), default=0)
     play_guide = db.Column(db.String(64))
-
 
 
 class Information(db.Model):
@@ -172,6 +151,29 @@ class Category(db.Model):
         return str(data)
 
 
+class Topic(db.Model):
+    __tablename__ = 'topic'
+
+    id = db.Column(db.Integer(), primary_key=True, nullable=False)
+    user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
+    type_id = db.Column(db.Integer, nullable=False)  # 国外 0 国内 1  主题 2
+    topic_name = db.Column(db.String(64), unique=True)
+    image_name = db.Column(db.String(50), nullable=False)
+    topic_info = db.Column(db.String(100))
+    allowed = db.Column(db.Boolean, default=False, nullable=False)
+    # topic_member = db.relationship('TopicMember',  # 专题对应的小组
+    #                            foreign_keys=[TopicMember.topic_id],
+    #                            backref=db.backref('topic', lazy='joined'),
+    #                            lazy='dynamic',
+    #                            cascade='all, delete-orphan')
+
+    category = db.relationship('Category',  # 专题对应的小组
+                               foreign_keys=[Category.topic],
+                               backref=db.backref('Category', lazy='joined'),
+                               lazy='dynamic',
+                               cascade='all, delete-orphan')
+
+
 class Follow(db.Model):
     __tablename__ = 'follows'
     follower_id = db.Column(db.Integer, db.ForeignKey('users.id'),
@@ -223,16 +225,16 @@ class User(db.Model, UserMixin):
                             cascade='all, delete-orphan')
 
     topic_user = db.relationship('TopicMember',  # 专题对应的小组
-                                   foreign_keys=[TopicMember.topic_user_id],
-                                   backref=db.backref('topic_user', lazy='joined'),
-                                   lazy='dynamic',
-                                   cascade='all, delete-orphan')
+                                 foreign_keys=[TopicMember.topic_user_id],
+                                 backref=db.backref('topic_user', lazy='joined'),
+                                 lazy='dynamic',
+                                 cascade='all, delete-orphan')
 
     categories = db.relationship('Category',  # 关注用户的人
-                                foreign_keys=[Category.user],
-                                backref=db.backref('followed', lazy='joined'),
-                                lazy='dynamic',
-                                cascade='all, delete-orphan')
+                                 foreign_keys=[Category.user],
+                                 backref=db.backref('followed', lazy='joined'),
+                                 lazy='dynamic',
+                                 cascade='all, delete-orphan')
 
     followers = db.relationship('Follow',  # 关注用户的人
                                 foreign_keys=[Follow.followed_id],

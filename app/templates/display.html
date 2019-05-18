@@ -337,6 +337,10 @@
             <div class="markdown-body editormd-preview-container">
                 <div class="section-title" style="margin-bottom:5%">
                     <h2>{{ post.title }}</h2>
+                    {% if not current_user.is_anonymous and post.user == current_user.id %}
+                    <a class="button-group js-submit-button" href="/edit_file/{{ post.id }}">修改文章</a>
+                    <a href="/del_file/{{ current_user.id }}/{{ post.id }}">删除文章</a>
+                    {% endif %}
                     <div style="float:right">
                         {% if not current_user.is_anonymous %}
                             {% if is_collect %}
@@ -366,7 +370,7 @@
                                 {% if comment.comment_rate != 0 %}
                                     <div id="starBg{{ comment.id }}" class="star_bg"
                                          style="margin-left: 50%;margin-top: 25px;margin-bottom: 20px;">
-                                        <input type="radio" checked id="starScore{{ comment.id }}"
+                                        <input type="radio" checked="true" id="starScore{{ comment.id }}"
                                                class="score score_{{ comment.comment_rate }}"
                                                value="{{ comment.comment_rate }}"
                                                name="score_{{ comment.id }}">

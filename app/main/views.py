@@ -2,7 +2,7 @@
 
 from flask import redirect, flash, url_for, request, abort, send_from_directory
 from flask import Blueprint, current_app, session
-from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword
+from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword, CreateTopic
 from flask_login import login_required, current_user
 from app import db
 from werkzeug.utils import secure_filename
@@ -164,7 +164,8 @@ def dispaly(key):
         if comments[_index].comment_user_id or 0 > 0:
             comments[_index].comment_user = User.query.filter_by(id=comments[_index].comment_user_id).first().username
 
-    return render_template("display.html", post=p, is_collect=is_collect, comments=comments, rate=p.rate, people_num=people_num, rate_list=rate_list, location=p.location)
+    return render_template("display.html", post=p, is_collect=is_collect, comments=comments, rate=p.rate,
+                           people_num=people_num, rate_list=rate_list, location=p.location)
 
 
 @main.route("/cancel/<key>", methods=['GET', "POST"])
@@ -265,7 +266,7 @@ def edit_file(key):
     if not p:
         flash(u'该文章不存在！', 'warning')
         abort(404)
-    form = PostForm(title=p.title, text=p.content)
+    form = PostForm(title=p.title, text=p.content, location=p.location)
     if request.method == "POST":
         p.location = request.values.get('location')
         p.title = request.values.get("title")
@@ -426,6 +427,59 @@ def edit_email():
     return render_template("edit/edit_email.html", form=form)
 
 
+@main.route("/create_topic", methods=['GET', 'POST'])
+@login_required
+def create_topic():
+    form = CreateTopic()
+    if request.method == "POST":
+        # filter 支持表达式 比 filter 更强大
+        topic = Topic()
+        temp = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first()
+        if temp:
+            flash(u"该主题已经被创建过，请重新输入!", "warning")
+            return redirect(url_for("main.create_topic"))
+        else:
+            topic.topic_name = form.topic_name.data
+        topic.type_id = form.topic_id.data
+        _file = request.files['filename'] if 'filename' in request.files else None
+
+        if _file:
+            _type = _file.filename.split(".")[-1].lower()
+
+            if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
+                flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
+                return redirect(url_for("main.create_topic"))
+
+            dirname = current_app.config['UPLOAD_FOLDER']  # 截图存放地点
+            topic.image_name = secure_filename(str(topic.topic_name) + "_topic_." + _type)
+            if not os.path.exists(dirname):
+                try:
+                    os.makedirs(dirname)
+                    _file.save(os.path.join(dirname, current_user.image_name))
+                except Exception as e:
+                    print(e)
+            else:
+                _file.save(os.path.join(dirname, current_user.image_name))
+
+        topic.user_id = current_user.id
+        topic.topic_info = form.topic_info.data
+        info = Information()
+        info.time = datetime.datetime.utcnow()
+        info.launch_id = current_user.id
+        info.receive_id = current_user.id
+        db.session.add(info)
+        db.session.flush()
+        info.info = u"用户" + current_user.username + u"创建了专题 {}。".format(topic.topic_name)
+        db.session.add(info)
+        db.session.add(topic)
+        db.session.commit()
+
+        flash(u"创建成功", "success")
+        return redirect(url_for("main.user_information", key=current_user.id))
+
+    return render_template("edit/edit_topic.html", form=form)
+
+
 @main.route("/edit_basic", methods=['GET', 'POST'])
 @login_required
 def edit_basic():
@@ -507,7 +561,8 @@ def add_comment(key):
         _info.time = datetime.datetime.utcnow()
         _info.launch_id = current_user.id
         category = Category.query.filter_by(id=key).first()
-        get_star = request.form.get('score') or 0
+        get_star = int(request.form['score']) if request.form.get('score') else 0
+        print(get_star)
         if get_star != 0:
             if get_star == 1:
                 category.one_num += 1
@@ -520,7 +575,8 @@ def add_comment(key):
             elif get_star == 5:
                 category.five_num += 1
             num = sum([category.five_num, category.four_num, category.three_num, category.two_num, category.one_num])
-            category.rate = 5.0 * category.five_num / num + 4.0 * category.four_num / num + 3.0 * category.three_num / num + 2.0 * category.two_num / num + 1.0 * category.one_num / num
+            if num > 0:
+                category.rate = 5.0 * category.five_num / num + 4.0 * category.four_num / num + 3.0 * category.three_num / num + 2.0 * category.two_num / num + 1.0 * category.one_num / num
             db.session.add(category)
         comment.comment_rate = get_star
         _info.receive_id = category.user
@@ -602,7 +658,7 @@ def del_comment(key):
 
     # 若是管理员，文章作者，评论作者都能删除评论
 
-    if current_user.role >= 31 or current_user.id == comment.author_id or current_user.id == category.user:
+    if current_user.role.permissions >= 31 or current_user.id == comment.author_id or current_user.id == category.user:
         db.session.delete(comment)
         db.session.commit()
         flash(u"删除成功!", "success")
