@@ -48,7 +48,7 @@
             .user-unfollow-button.off {
                 float: right;
                 font-size: 15px;
-                border: 1px solid hsla(0,0%,59%,.6);
+                border: 1px solid hsla(0, 0%, 59%, .6);
                 color: #8c8c8c;
                 background-color: white;
                 text-align: center;
@@ -170,12 +170,30 @@
                 color: #999;
             }
 
+            @font-face {
+                font-family: 'Glyphicons Halflings';
+                src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot');
+                src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/static/bootstrap/fonts/glyphicons-halflings-regular.woff') format('woff'),
+                url('/static/bootstrap/fonts/glyphicons-halflings-regular.ttf') format('truetype'),
+                url('/static/bootstrap/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+            }
+
             .note-list .meta {
                 margin-left: 20%;
                 padding-right: 0 !important;
                 font-size: 12px;
                 font-weight: 400;
                 line-height: 20px;
+            }
+
+            .rotate_i {
+                display: inline-block;
+                line-height: 1;
+                transition: .5s ease;
+                transition-property: all;
+                transition-duration: 0.5s;
+                transition-timing-function: ease;
+                transition-delay: 0s;  <!-- 设置转速 -->
             }
 
             .jsd-meta {
@@ -229,7 +247,9 @@
                                                     <ul class="multi-column-dropdown">
                                                         <li><a href="/user_information/{{ current_user.id }}">我的主页</a>
                                                         </li>
-                                                        <li><a href="{{ url_for('main.show_collect') }}">收藏的文章</a></li>
+                                                        <li>
+                                                            <a href="{{ url_for('main.show_collect', key=0) }}">收藏的文章</a>
+                                                        </li>
                                                         <li><a href="{{ url_for('main.edit_basic') }}">设置</a></li>
                                                     </ul>
                                                 </div>
@@ -260,6 +280,8 @@
                 var btn = document.getElementById('flash');
                 btn.style.display = 'none';
             }
+
+            window.rorate = 0
         </script>
         <div class="container" id="flash" style="text-align:center;">
             <div class="row clearfix">
@@ -277,6 +299,8 @@
     {% endblock message %}
     <script>
         function f2() {
+            window.rorate += 360;
+            document.getElementById('rotate').setAttribute('style', 'margin-left: 120px;transform: rotate(' + window.rorate + 'deg);');
             $.ajax({
                 url: "/get_author_list",
                 type: "GET",
@@ -286,12 +310,12 @@
                 }
             });
         }
-
-        f2();
     </script>
-    <div style="float: right;margin-top: 5%;margin-right:100px">
+    <div style="float: right;margin-top: 5%;margin-right:100px" onclick="f2()">
         <span style="text-align: left;">推荐作者</span>
-        <span style="margin-left: 120px;cursor:pointer" onclick="f2()">换一批</span>
+        <li id='rotate' class="glyphicon glyphicon-refresh rotate_i" style="transform: rotate(0deg);margin-left: 120px;"></li>
+        <span style="cursor:pointer" id='rotate'>换一批</span>
+        <script>f2();</script>
         <ul id="author_list">
         </ul>
     </div>
@@ -404,7 +428,6 @@
             });
 
             function f3(data_list) {
-                console.log(data_list);
                 document.getElementById("author_list").innerHTML = "";
                 for (index in data_list) {
                     document.getElementById("author_list").innerHTML += data_list[index] + '<br><br><br>';

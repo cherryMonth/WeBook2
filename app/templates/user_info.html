@@ -226,6 +226,7 @@
             filter: alpha(opacity=80);
         }
 
+
         @font-face {
             font-family: 'Glyphicons Halflings';
             src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot');
@@ -281,6 +282,26 @@
                 $("#mask").css({display: 'none'});
             }
         </script>
+        <div style="position: relative;
+            margin-bottom: 16px;
+            padding: 0 0 16px;
+            text-align: left;
+            font-size: 15px;
+            clear: both;
+            word-break: break-word !important;
+            word-break: break-all;">
+            <div id="user_info" style="float: right;border-bottom: 1px solid rgb(240, 240, 240);margin-right: 150px;margin-bottom: 30px;line-height: 20px;
+    font-size: 14px;">
+                <div style="margin-bottom: 10px;font-size: 20px;border-bottom: 1px solid rgb(240, 240, 240);color: rgb(150, 150, 150);">个人介绍
+                </div>
+                <br>
+                {{ user.about_me }}
+                <li style="list-style-type: none;margin-top: 50px;"><a href=""><i class="glyphicon glyphicon-home"></i>他创建的专题</a></li>
+                <li style="list-style-type: none"><a href="{{ url_for('main.show_collect', key=user.id) }}"><i class="glyphicon glyphicon-star"></i>他喜欢的文章</a>
+                </li>
+            </div>
+        </div>
+
         <div id="user_info" class="container">
             <a class="avatar" href="{{ url_for('main.user_information', key=user.id) }}">
                 <img src="/show_image/{{ user.id }}" class="round_icon" style="float:left"></a>

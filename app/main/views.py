@@ -194,10 +194,13 @@ def cancel(key):
         return redirect("/display/" + key)
 
 
-@main.route("/show_collect/", methods=['GET', "POST"])
+@main.route("/show_collect/<int:key>", methods=['GET', "POST"])
 @login_required
-def show_collect():
-    collects = Favorite.query.filter_by(favorite_id=current_user.id).all()
+def show_collect(key=0):
+    if key == 0:
+        collects = Favorite.query.filter_by(favorite_id=current_user.id).all()
+    else:
+        collects = Favorite.query.filter_by(favorite_id=key).all()
 
     doc_list = list()
 
@@ -476,7 +479,6 @@ def create_topic():
 
         flash(u"创建成功", "success")
         return redirect(url_for("main.user_information", key=current_user.id))
-
     return render_template("edit/edit_topic.html", form=form)
 
 
