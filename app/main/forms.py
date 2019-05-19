@@ -9,10 +9,11 @@ class PostForm(FlaskForm):
     title = StringField("", render_kw={'placeholder': u'主题(仅限于30字内...)'})
     location = StringField("", render_kw={'placeholder': u'地理位置(仅限于50字内...可选)'})
     text = TextAreaField("", [DataRequired(), Length(max=10000)])
-    categories = SelectMultipleField('Categories', coerce=int)
+    topic = StringField("", '文章主题', render_kw={'placeholder': u'为您的文章选个有趣的主题吧...'})
+    topic_id = SelectMultipleField('Topic_id', coerce=int)
     submit = SubmitField(u"发布文章")
 
-    def __init__(self, title="", text="", location=""):
+    def __init__(self, title="", text="", location="", topic=""):
         super(PostForm, self).__init__()
         if title:
             self.title.data = title
@@ -20,8 +21,9 @@ class PostForm(FlaskForm):
             self.text.data = text
         if location:
             self.location.data = location
-        self.categories.choices = [(c.id, c.title) for c in Category.query.order_by('id')]
-
+        if topic:
+            self.topic.data = topic
+        self.topic_id.choices = [(0, "国内主题"), (1,"国外主题"), (2, "特色主题")]
 
 class FindFile(FlaskForm):
     input = StringField("", render_kw={'placeholder': u'输入您想查找的文章内容...'})

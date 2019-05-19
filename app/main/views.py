@@ -82,12 +82,16 @@ def work(_id, info):
 def edit():
     form = PostForm()
     p = Category()
+    domestic_list = Topic.query.filter_by(type_id=0).all()
+    foreign_list = Topic.query.filter_by(type_id=1).all()
+    unique_list = Topic.query.filter_by(type_id=2).all()
     if request.method == "POST":
+
         p.title = form.title.data
         p.content = form.text.data
         p.user = current_user.id
         p.location = form.location.data
-        p.topic = 1
+        p.topic = form.topic
         p.update_time = datetime.datetime.utcnow()
         db.session.add(p)
         db.session.commit()
@@ -107,7 +111,8 @@ def edit():
 
         flash(u'保存成功！', 'success')
         return redirect(url_for('main.edit'))
-    return render_template('edit.html', form=form)
+    return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list,
+                           unique_list=unique_list)
 
 
 @main.route("/", methods=['GET', "POST"])
@@ -268,7 +273,10 @@ def edit_file(key):
     if not p:
         flash(u'该文章不存在！', 'warning')
         abort(404)
-    form = PostForm(title=p.title, text=p.content, location=p.location)
+    domestic_list = Topic.query.filter_by(type_id=0).all()
+    foreign_list = Topic.query.filter_by(type_id=1).all()
+    unique_list = Topic.query.filter_by(type_id=2).all()
+    form = PostForm(title=p.title, text=p.content, location=p.location, topic=p.topic)
     if request.method == "POST":
         p.location = request.values.get('location')
         p.title = request.values.get("title")
@@ -283,7 +291,7 @@ def edit_file(key):
         t.start()
         flash(u'保存成功！', 'success')
         return redirect(url_for('main.edit'))
-    return render_template('edit.html', form=form)
+    return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list, unique_list=unique_list)
 
 
 @main.route("/download/<key>", methods=['GET'])

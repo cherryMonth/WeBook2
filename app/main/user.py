@@ -253,7 +253,7 @@ def get_topic_category():
     if key == 0:
         temp = Category.query.filter_by(topic=topic_id)
     else:
-        temp = Category.query.filter_by(user_id=key, topic_id=topic_id)
+        temp = Category.query.filter_by(user=key, topic=topic_id)
     length = len(temp.all())
     target_page_num = 5
     page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)

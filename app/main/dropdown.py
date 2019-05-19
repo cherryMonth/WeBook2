@@ -105,10 +105,10 @@ def get_author_list():
         author_instance = User.query.filter_by(id=k).first()
         author['name'] = author_instance.username
         author['id'] = k
-        categories = Category.query.filter_by(user=k).all()
-        word_count = sum(map(lambda x: len(x.content), categories))
+        categories = Category.query.filter_by(user=k)
+        word_count = sum(map(lambda x: len(x.content), categories.all()))
         author['word_count'] = word_count
-        collect_num = Category.query.filter_by(id=k).with_entities(func.sum(Category.collect_num)).first()[0] or 0
+        collect_num = categories.with_entities(func.sum(Category.collect_num)).first()[0] or 0
         author['collect_num'] = collect_num
         if not current_user.is_anonymous and author_instance.is_followed_by(current_user):
             url = "/unfollowed_user/{}".format(k)

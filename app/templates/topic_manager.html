@@ -434,6 +434,7 @@
 
                 function f1(handler) {
                     window.topic_id = handler.id;
+                    document.getElementById('note-list').innerHTML = '';
                     f2(handler.id);
                     window.page = 1;
                     $.ajax({
