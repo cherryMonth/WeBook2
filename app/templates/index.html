@@ -193,7 +193,8 @@
                 transition-property: all;
                 transition-duration: 0.5s;
                 transition-timing-function: ease;
-                transition-delay: 0s;  <!-- 设置转速 -->
+                transition-delay: 0s;
+            <!-- 设置转速 -->
             }
 
             .jsd-meta {
@@ -230,6 +231,7 @@
                                 <li><a href="{{ url_for('main.index') }}">首页</a></li>
                                 <li><a href="{{ url_for('main.find_file', key=7) }}">发现</a></li>
                                 <li><a href="{{ url_for('user.find_user') }}">关注</a></li>
+                                <li><a href="{{ url_for('user.topic_manager', key=0) }}">主题专区</a></li>
                                 {% if not current_user.is_anonymous %}
                                     <li style="margin-left:25%"><a
                                             href="{{ url_for('user.information', page=1) }}">消息<span
@@ -313,7 +315,8 @@
     </script>
     <div style="float: right;margin-top: 5%;margin-right:100px" onclick="f2()">
         <span style="text-align: left;">推荐作者</span>
-        <li id='rotate' class="glyphicon glyphicon-refresh rotate_i" style="transform: rotate(0deg);margin-left: 120px;"></li>
+        <li id='rotate' class="glyphicon glyphicon-refresh rotate_i"
+            style="transform: rotate(0deg);margin-left: 120px;"></li>
         <span style="cursor:pointer" id='rotate'>换一批</span>
         <script>f2();</script>
         <ul id="author_list">

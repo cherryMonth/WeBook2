@@ -74,7 +74,7 @@ def get_author_list():
                 <img src="/show_image/{}" class="round_icon" style="float:left"></a>
                 <div id="info" class="info">
                 <div class="title">
-                    <a class="name">{}</a>
+                    <a class="name" href="/user_information/{}">{}</a>
                 </div>
                 <ul>
                     <li class="li">
@@ -121,6 +121,5 @@ def get_author_list():
             _class = "user-follow-button"
             color = "white"
         author_json_list.append(
-            html.format(k, k, author['name'], author['word_count'], author['collect_num'], _class, url, color, string))
+            html.format(k, k, k,author['name'], author['word_count'], author['collect_num'], _class, url, color, string))
     return json.dumps(author_json_list)
-

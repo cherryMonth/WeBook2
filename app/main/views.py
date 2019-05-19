@@ -195,7 +195,6 @@ def cancel(key):
 
 
 @main.route("/show_collect/<int:key>", methods=['GET', "POST"])
-@login_required
 def show_collect(key=0):
     if key == 0:
         collects = Favorite.query.filter_by(favorite_id=current_user.id).all()
@@ -458,11 +457,11 @@ def create_topic():
             if not os.path.exists(dirname):
                 try:
                     os.makedirs(dirname)
-                    _file.save(os.path.join(dirname, current_user.image_name))
+                    _file.save(os.path.join(dirname, topic.image_name))
                 except Exception as e:
                     print(e)
             else:
-                _file.save(os.path.join(dirname, current_user.image_name))
+                _file.save(os.path.join(dirname, topic.image_name))
 
         topic.user_id = current_user.id
         topic.topic_info = form.topic_info.data
@@ -700,3 +699,12 @@ def show_image(key):
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
     else:
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], user.image_name)
+
+
+@main.route("/show_topic_image/<key>", methods=['GET', 'POST'])
+def show_topic_image(key):
+    topic = Topic.query.filter_by(image_name=key).first()
+    if not topic:
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
+    else:
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], topic.image_name)

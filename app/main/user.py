@@ -7,7 +7,7 @@ import requests
 import re
 from app.main.parse import Extractor
 import markdown
-from app.main.models import Category, Comment
+from app.main.models import Category, Comment, Topic
 from app.main.forms import FindUser
 from app.main.models import User, Information
 from app import db
@@ -220,7 +220,70 @@ def get_category():
                 </li>"""
         result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
     ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
-        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon", "image/vnd.microsoft.icon"]
+        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon",
+                      "image/vnd.microsoft.icon"]
+        tmp_url = None
+        for url in result:
+            response = requests.get(url[:-1])
+            if response.status_code == 200 and response.headers.get('Content-Type') in image_type:
+                tmp_url = url[:-1]
+                break
+        image_url = tmp_url or "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+
+        exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
+                'markdown.extensions.toc']
+        ext = Extractor(0)
+        content = ext.getPlainText(markdown.markdown(doc.content, extensions=exts))[:75] + "..."
+        update_time = str(doc.update_time)
+        comment_num = len(Comment.query.filter_by(post_id=doc.id).all())
+        html = html.format(doc.id, doc.id, image_url, doc.id, doc.title, doc.id, content, \
+                           doc.rate, doc.id, doc.collect_num, doc.id, comment_num, update_time, update_time)
+        item = dict()
+        item['html'] = html
+        item['id'] = doc.id
+        docs_html_list.append(item)
+    return json.dumps(docs_html_list)
+
+
+@user.route('/get_topic_category', methods=['GET', "POST"])
+def get_topic_category():
+    key = int(request.args['key']) if request.args.get('key') else 0
+    num = int(request.args['num'])
+    topic_id = int(request.args['topic_id'])
+    if key == 0:
+        temp = Category.query.filter_by(topic=topic_id)
+    else:
+        temp = Category.query.filter_by(user_id=key, topic_id=topic_id)
+    length = len(temp.all())
+    target_page_num = 5
+    page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
+    if num > page_num:
+        return '[]'
+    docs = temp.order_by(Category.id.desc()).paginate(num, target_page_num, error_out=True).items
+    docs_html_list = list()
+    for doc in docs:
+        html = """<li id="{}" class="have-img">
+                    <a class="warp-img" href="/display/{}">
+                    <img class="  img-blur-done" src={} style="float:right;margin-right:37%" height=100 width=125>
+                    </a>
+                    <div style="margin-top: 20px;" class="container">
+                        <a class="title" target="_blank" href="/display/{}">{}</a>
+                        <p  class="abstract" style="cursor:pointer" onclick="window.location='/display/{}';">
+                            {}
+                        </p>
+                        </div>
+                        <div class="meta">
+                        <span class="glyphicon glyphicon-send">{}</span>
+                            <a target="_blank" style="margin-left: 20px" class='glyphicon glyphicon-eye-open' href="/display/{}">{}</a>
+                             <a target="_blank" style="margin-left: 10px" class='glyphicon glyphicon-comment' href="/display/{}">{}</a>
+                            <span style="margin-left: 20px" class="flask-moment" data-timestamp="{}" data-format="fromNow(0)" data-refresh="0">{}</span>
+                        </div>
+                    </div>
+                </li>"""
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
+    ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon",
+                      "image/vnd.microsoft.icon"]
         tmp_url = None
         for url in result:
             response = requests.get(url[:-1])
@@ -308,7 +371,8 @@ def get_comment():
     _id = int(request.args['_id'])
     target_page_num = 5
     recent_doc_list = Category.query.from_statement(text("""select category.id, category.content, category.title, update_time, timestamp,  category.collect_num , category.rate
-from category, comment where category.id = comment.post_id and category.user = {} order by timestamp desc;""".format(key))).all()
+from category, comment where category.id = comment.post_id and category.user = {} order by timestamp desc;""".format(
+        key))).all()
     cache = []
     for t in recent_doc_list:
         if t.id not in cache:
@@ -409,3 +473,57 @@ def get_hot():
         item['id'] = doc.id
         docs_html_list.append(item)
     return json.dumps(docs_html_list)
+
+
+@user.route("/topic_manager/<int:key>", methods=['GET', 'POST'])
+def topic_manager(key):
+    if key == 0:
+        domestic_list = Topic.query.filter_by(type_id=0).all()
+        foreign_list = Topic.query.filter_by(type_id=1).all()
+        unique_list = Topic.query.filter_by(type_id=2).all()
+    else:
+        domestic_list = Topic.query.filter_by(type_id=0, user_id=key).all()
+        foreign_list = Topic.query.filter_by(type_id=1, user_id=key).all()
+        unique_list = Topic.query.filter_by(type_id=2, user_id=key).all()
+    if domestic_list:
+        first_topic = domestic_list[0]
+    elif foreign_list:
+        first_topic = foreign_list[0]
+    elif unique_list:
+        first_topic = unique_list[0]
+    return render_template("topic_manager.html", domestic_list=domestic_list, foreign_list=foreign_list,
+                           unique_list=unique_list, first_topic=first_topic, key=key)
+
+
+@user.route('/get_topic_info', methods=['GET', 'POST'])
+def get_topic_info():
+    key = int(request.args.get('key'))
+    topic = Topic.query.filter_by(id=key).first_or_404()
+    user = User.query.filter_by(id=topic.user_id).first_or_404()
+    html = """<div style="float:left;">
+                    <a id="topic_info" class="warp-img">
+                        <img id='topic_image' style="margin-left: 20px;"
+                             src='/show_topic_image/{}'
+                             style="float:right;margin-right:37%" height="200" width="250">
+                    </a>
+                </div>
+                <div>
+                    <div class="li_title" style="float: left" id="topic_title">
+                       {}
+                    </div>
+                    <br>
+                    <div>
+                        <p class="abstract" id="topic_text">{}</p>
+                    </div>
+                    <div id="user_info" style="margin-top: 100px;margin-left: 80%" class="container">
+                        <a class="avatar" href="/user_information/{}">
+                            <img src="/show_image/{}" class="round_icon" style="float:left"></a>
+                        <div id="info" class="info">
+                        <div class="title">
+                            <a class="name" href="/user_information/{}">{}</a>
+                        </div>
+                        <span style="margin-left: 20px" class="flask-moment" data-timestamp="{}" data-format="fromNow(0)" data-refresh="0">{}</span>
+                    </div>
+                """
+    return html.format(topic.image_name, topic.topic_name, topic.topic_info, user.id, user.id, user.id, user.username,
+                       topic.create_time, topic.create_time)

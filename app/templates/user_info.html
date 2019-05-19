@@ -296,7 +296,7 @@
                 </div>
                 <br>
                 {{ user.about_me }}
-                <li style="list-style-type: none;margin-top: 50px;"><a href=""><i class="glyphicon glyphicon-home"></i>他创建的专题</a></li>
+                <li style="list-style-type: none;margin-top: 50px;"><a href="{{ url_for('user.topic_manager', key=user.id) }}"><i class="glyphicon glyphicon-home"></i>他创建的专题</a></li>
                 <li style="list-style-type: none"><a href="{{ url_for('main.show_collect', key=user.id) }}"><i class="glyphicon glyphicon-star"></i>他喜欢的文章</a>
                 </li>
             </div>

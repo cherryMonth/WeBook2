@@ -1,0 +1,524 @@
+{% extends "index.html" %}
+{% block styles %}
+    {{ super() }}
+    <style>
+        a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .menu {
+            float: left;
+            margin-left: 20px;
+            list-style-type: none;
+            border: 0;
+            font-size: 100%;
+            font-style: inherit;
+            font-weight: inherit;
+            outline: 0;
+            padding: 0;
+            vertical-align: baseline;
+        }
+
+        .li_title {
+            margin: -7px 0 4px;
+            display: inherit;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .note-list .abstract {
+            margin: 0 0 8px;
+            font-size: 13px;
+            line-height: 24px;
+            color: #999;
+        }
+
+
+        element.style {
+        }
+
+        .note-list .abstract {
+            margin: 0 0 8px;
+            font-size: 13px;
+            line-height: 24px;
+            color: #999;
+        }
+
+        p {
+            margin: 0 0 10px;
+        }
+
+        *, :after, :before {
+            box-sizing: border-box;
+        }
+
+        user agent stylesheet
+        p {
+            display: block;
+            margin-block-start: 1em;
+            margin-block-end: 1em;
+            margin-inline-start: 0px;
+            margin-inline-end: 0px;
+        }
+
+        .round_icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .info {
+            margin-top: 5px;
+            padding-left: 70px;
+            font-size: 14px;
+        }
+
+        .title .name {
+            display: inline;
+            font-size: 21px;
+            font-weight: 700;
+            font-family: Georgia, Times New Roman, Times, Songti SC, serif;
+            vertical-align: middle;
+            margin: -7px 0 4px;
+            line-height: 1.5;
+        }
+
+        ul .meta-block {
+            font-size: 12px;
+            margin: 0 3px 6px 0;
+            padding: 0 7px 0 0;
+            border-right: 1px solid #f0f0f0;
+        }
+
+        .li {
+            float: left;
+            margin-left: 10px;
+            list-style-type: none;
+        }
+
+        .iconfont {
+            font-family: iconfont !important;
+            font-size: inherit;
+            font-style: normal;
+            font-weight: 400 !important;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .user-follow-button.off {
+            float: right;
+            margin: 23px 200px 23px 16px;
+            font-size: 15px;
+            color: #fff;
+            background-color: #42c02e;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: 400;
+            border: 1px solid transparent;
+            line-height: normal;
+            padding: 8px 0;
+            width: 100px;
+        }
+
+        .user-unfollow-button.off {
+            float: right;
+            margin: 23px 200px 23px 16px;
+            border: 1px solid hsla(0, 0%, 59%, .6);
+            font-size: 15px;
+            color: #8c8c8c;
+            background-color: white;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: 400;
+            line-height: normal;
+            padding: 8px 0;
+            width: 100px;
+        }
+
+        .btn-hollow {
+            float: right;
+            margin: 23px 50px 23px 16px;
+            font-size: 15px;
+            color: #42c02e !important;
+            text-align: center;
+            border-radius: 40px;
+            font-weight: 400;
+            border: 1px solid rgba(59, 194, 29, .7);
+            line-height: normal;
+            padding: 8px 0;
+            width: 100px;
+        }
+
+        .active {
+            border-bottom: 2px solid #646464;
+        }
+
+        .note-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .note-list li {
+            position: relative;
+            width: 100%;
+            margin: 0 0 15px;
+            padding: 15px 2px 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+            word-wrap: break-word;
+        }
+
+        .note-list li.have-img {
+            min-height: 140px;
+        }
+
+        .note-list .have-img .wrap-img {
+            position: absolute;
+            top: 50%;
+            margin-top: -60px;
+            right: 0;
+            width: 125px;
+            height: 100px;
+        }
+
+        .note-list .title {
+            margin: -7px 0 4px;
+            display: inherit;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.5;
+            font-family: Georgia, Times New Roman, Times, Songti SC, serif;
+        }
+
+        .note-list .abstract {
+            margin: 0 0 8px;
+            font-size: 13px;
+            line-height: 24px;
+            color: #999;
+        }
+
+        .note-list .meta {
+            margin-left: 22%;
+            padding-right: 0 !important;
+            font-size: 12px;
+            font-weight: 400;
+            line-height: 20px;
+        }
+
+        .jsd-meta {
+            color: #ea6f5a !important;
+        }
+
+        .note-list .title {
+            margin: -7px 0 4px;
+            display: inherit;
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+
+        .mask {
+            margin: 0;
+            padding: 0;
+            border: none;
+            width: 100%;
+            height: 100%;
+            background: #333;
+            opacity: 0.6;
+            filter: alpha(opacity=60);
+            z-index: 9999;
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        .form {
+            position: absolute;
+            left: 30%;
+            background: white;
+            width: 700px;
+            height: 500px;
+            border: 3px solid #444;
+            border-radius: 7px;
+            z-index: 10000;
+            display: none;
+        }
+
+        .row1 {
+            background: #f7f7f7;
+            padding: 0px 20px;
+            line-height: 50px;
+            height: 50px;
+            font-weight: bold;
+            color: #666;
+            font-size: 20px;
+        }
+
+        #_submit {
+            color: White;
+            background: #4490f7;
+            text-decoration: none;
+            padding: 10px 95px;
+            margin-top: 40px;
+            border-radius: 5px;
+            opacity: 0.8;
+            margin-left: 35%;
+            filter: alpha(opacity=80);
+        }
+
+        .a_sur
+
+
+        @font-face {
+            font-family: 'Glyphicons Halflings';
+            src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot');
+            src: url('/static/bootstrap/fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('/static/bootstrap/fonts/glyphicons-halflings-regular.woff') format('woff'),
+            url('/static/bootstrap/fonts/glyphicons-halflings-regular.ttf') format('truetype'),
+            url('/static/bootstrap/fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg');
+        }
+
+    </style>
+{% endblock styles %}
+{% block body %}
+    <script src="/static/js/jquery-1.11.1.min.js"></script>
+    <script src="/static/js/moment-with-locales.min.js"></script>
+
+    {% block navbar %}
+        {{ super() }}
+    {% endblock navbar %}
+
+    {% block message %}
+        {{ super() }}
+    {% endblock message %}
+
+    {% block content %}
+        <div class="container">
+            <div>
+                <div class="li_title">国内主题</div>
+                <div>
+                    {% for topic in domestic_list %}
+                        <li class="menu" value="0"><a style="cursor:pointer" id="{{ topic.id }}"
+                                                      onclick="f1(this)">{{ topic.topic_name }}</a>
+                        </li>
+                    {% endfor %}
+                </div>
+            </div>
+            <br><br>
+            <div>
+                <div class=" li_title">国外主题
+                </div>
+                <div>
+                    {% for topic in foreign_list %}
+                        <li class="menu" value="1"><a style="cursor:pointer" class="" id="{{ topic.id }}"
+                                                      onclick="f1(this)">{{ topic.topic_name }}</a>
+                        </li>
+                    {% endfor %}
+                </div>
+            </div>
+            <br><br>
+            <div>
+                <div class=" li_title">特色主题
+                </div>
+                <div>
+                    {% for topic in unique_list %}
+                        <li class="menu" value="2"><a style="cursor:pointer" id="{{ topic.id }}"
+                                                      onclick="f1(this)">{{ topic.topic_name }}</a>
+                        </li>
+                    {% endfor %}
+                </div>
+            </div>
+            <hr style="width: 1000px">
+            <div id="topic_info"></div>
+            <hr style="width: 1000px">
+            <div id="list-container">
+                <ur class="note-list" id="note-list">
+
+                </ur>
+            </div>
+            <script>
+                length = document.getElementsByClassName('menu').length;
+                window.page = 1;
+                f2({{ first_topic.id }})
+                if (length > 0) {
+                    window.topic_id = document.getElementsByClassName('menu')[0].children[0].id;
+                    $.ajax({
+                        url: "/get_topic_category?key={{ key }}&topic_id=" + window.topic_id + "&num=" + window.page,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            console.log('send');
+                            f(data);
+                        }
+                    });
+                }
+                $(window).scroll(function () {
+                    var windowH = $(window).height();//设备可见区域高度
+                    var documentH = $(document).height();//整个网页的高度（包括未显示的部分）
+                    var scrollH = $(window).scrollTop();//滚动条滚动上去的高度
+                    //或者  scrollH = $(document).scrollTop();
+                    console.log(windowH + scrollH >= documentH);
+                    if (windowH + scrollH >= documentH) {
+                        $.ajax({
+                            url: "/get_topic_category?key={{ key }}&topic_id=" + window.topic_id + "&num=" + window.page,
+                            type: "GET",
+                            dataType: "json",
+                            success: function (data) {
+                                console.log('send');
+                                f(data);
+                            }
+                        });
+                    }
+                });
+
+                function f2(hander) {
+                    console.log(hander);
+                    $.ajax({
+                        url: "/get_topic_info?key=" + hander,
+                        type: "GET",
+                        dataType: "html",
+                        success: function (data) {
+                            console.log(data);
+                            f3(data)
+                        }
+                    });
+                }
+
+                function f3(data) {
+                    document.getElementById("topic_info").innerHTML = "";
+                    if (data) {
+                        document.getElementById("topic_info").innerHTML += data;
+                        flask_moment_render_all();
+                    }
+                }
+
+                function f(data_list) {
+                    console.log('get it');
+                    if (data_list.length === 0) {
+                        alert("我也是有底线的！");
+                        return 0;
+                    }
+                    for (index in data_list) {
+                        document.getElementById("note-list").innerHTML += data_list[index]['html'];
+                    }
+                    window.page += 1;
+                    moment.locale("zh_CN");
+
+                    function flask_moment_render(elem) {
+                        elem.innerHTML = eval('moment("' + elem.dataset.timestamp + '").' + elem.dataset.format + ';');
+                        elem.classList.remove('flask-moment');
+                        elem.style.display = 'inline';
+                    }
+
+                    function flask_moment_render_all() {
+                        elems = Array.from(document.getElementsByClassName('flask-moment'));
+                        for (var i = 0; i < elems.length; i++) {
+                            elem = elems[i];
+                            flask_moment_render(elem);
+                            if (elem.dataset.refresh > 0) {
+                                setInterval(function () {
+                                    flask_moment_render(this);
+                                }.bind(elem), parseInt(elem.dataset.refresh));
+                            }
+                        }
+                    }
+
+                    flask_moment_render_all();
+                }
+
+                function f1(handler) {
+                    window.topic_id = handler.id;
+                    f2(handler.id);
+                    window.page = 1;
+                    $.ajax({
+                        url: "/get_topic_category?key={{ key }}&topic_id=" + window.topic_id + "&num=" + window.page,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            console.log('send');
+                            if (data.length === 0) {
+                                document.getElementById('note-list').innerHTML = '';
+                            } else {
+                                f(data);
+                            }
+
+                        }
+                    });
+                }
+            </script>
+        </div>
+    {% endblock content %}
+
+    {% block content_script %}
+        <script src="/static/js/jquery-1.11.1.min.js"></script>
+        <script src="/static/js/moment-with-locales.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                $(".dropdown").hover(
+                    function () {
+                        {#$('.dropdown-menu', this).stop(true).slideDown("fast");#}
+                        $(this).toggleClass('open');
+                    },
+                    function () {
+                        {#$('.dropdown-menu', this).stop(true).slideUp("fast");#}
+                        $(this).toggleClass('open');
+                    }
+                );
+            });
+        </script>
+        <script type="text/javascript" src="/static/js/jquery.zoomslider.min.js"></script>
+        <script type="text/javascript" src="/static/js/typed.js"></script>
+        <script>
+            function flask_moment_render(elem) {
+                elem.innerHTML = "创建于: " + eval('moment("' + elem.dataset.timestamp + '").' + elem.dataset.format + ';');
+                elem.classList.remove('flask-moment');
+                elem.style.display = 'inline';
+            }
+
+            function flask_moment_render_all() {
+                elems = Array.from(document.getElementsByClassName('flask-moment'));
+                for (var i = 0; i < elems.length; i++) {
+                    elem = elems[i];
+                    flask_moment_render(elem);
+                    if (elem.dataset.refresh > 0) {
+                        setInterval(function () {
+                            flask_moment_render(this);
+                        }.bind(elem), parseInt(elem.dataset.refresh));
+                    }
+                }
+            }
+
+            flask_moment_render_all();
+        </script>
+    {% endblock content_script %}
+    {% block footer %}
+        <footer style="margin-top: 30%">
+            <div class="wrapper footer">
+                <ul>
+                    <li class="links">
+                        <ul>
+                            <li><img src="/static/img/record_logo.png" style="float:left; width: 18px; height: 18px;">
+                                <a style="color:white" href="http://www.miitbeian.gov.cn">豫ICP备18023119号</a></li>
+                            <li><a href="/">目前是正式1.5版本哦. O(∩_∩)O</a></li>
+                        </ul>
+                    </li>
+                    <li class="about" style="float:right">
+                        <ul>
+                            <li><a href="http://facebook.com" class="facebook" target="_blank"></a></li>
+                            <li><a href="http://twitter.com" class="twitter" target="_blank"></a></li>
+                            <li><a href="http://plus.google.com" class="google" target="_blank"></a></li>
+                            <li><a href="http://www.block1b.cn" class="skype" target="_blank"></a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </footer>
+
+    {% endblock footer %}
+{% endblock body %}

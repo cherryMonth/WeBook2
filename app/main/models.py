@@ -161,6 +161,7 @@ class Topic(db.Model):
     image_name = db.Column(db.String(50), nullable=False)
     topic_info = db.Column(db.String(100))
     allowed = db.Column(db.Boolean, default=False, nullable=False)
+    create_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
     # topic_member = db.relationship('TopicMember',  # 专题对应的小组
     #                            foreign_keys=[TopicMember.topic_id],
     #                            backref=db.backref('topic', lazy='joined'),
