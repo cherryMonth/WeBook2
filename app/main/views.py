@@ -278,6 +278,7 @@ def edit_file(key):
     unique_list = Topic.query.filter_by(type_id=2).all()
     form = PostForm(title=p.title, text=p.content, location=p.location, topic=p.topic)
     if request.method == "POST":
+        p.topic = request.values.get('topic')
         p.location = request.values.get('location')
         p.title = request.values.get("title")
         p.content = request.values.get("text")
@@ -287,8 +288,8 @@ def edit_file(key):
             os.system("rm -f {} ".format(filename))
         db.session.add(p)
         db.session.commit()
-        t = threading.Thread(target=work, args=(str(p.id), p.content.encode("utf-8")))
-        t.start()
+        # t = threading.Thread(target=work, args=(str(p.id), p.content.encode("utf-8")))
+        # t.start()
         flash(u'保存成功！', 'success')
         return redirect(url_for('main.edit'))
     return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list, unique_list=unique_list)
