@@ -91,7 +91,7 @@ def edit():
         p.content = form.text.data
         p.user = current_user.id
         p.location = form.location.data
-        p.topic = form.topic
+        p.topic = form.topic.data
         p.update_time = datetime.datetime.utcnow()
         db.session.add(p)
         db.session.commit()

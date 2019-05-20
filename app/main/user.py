@@ -175,7 +175,7 @@ def upload_images():
     else:
         result['success'] = 1
         result['message'] = u"上传成功!"
-        result['url'] = "http://www.webook.mobi/display_images/{}".format(filename)
+        result['url'] = "http://127.0.0.1:5000/display_images/{}".format(filename)
         return json.dumps(result)
 
 
@@ -485,6 +485,7 @@ def topic_manager(key):
         domestic_list = Topic.query.filter_by(type_id=0, user_id=key).all()
         foreign_list = Topic.query.filter_by(type_id=1, user_id=key).all()
         unique_list = Topic.query.filter_by(type_id=2, user_id=key).all()
+    first_topic = None
     if domestic_list:
         first_topic = domestic_list[0]
     elif foreign_list:

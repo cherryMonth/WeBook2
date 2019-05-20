@@ -345,7 +345,7 @@
             <script>
                 length = document.getElementsByClassName('menu').length;
                 window.page = 1;
-                f2({{ first_topic.id }})
+                f2({{ first_topic.id or 0 }})
                 if (length > 0) {
                     window.topic_id = document.getElementsByClassName('menu')[0].children[0].id;
                     $.ajax({

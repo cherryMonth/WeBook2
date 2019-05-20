@@ -6,7 +6,7 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from flask import current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
-from whoosh.analysis import SimpleAnalyzer
+from app import whoosh
 import hashlib
 
 
@@ -110,10 +110,9 @@ class Comment(db.Model):
     # disabled = db.Column(db.Boolean, default=False)  # 是否隐藏
 
 
+@whoosh.register_model('title', 'content')
 class Category(db.Model):
     __tablename__ = "category"
-    __searchable__ = ['title', 'content']
-    __analyzer__ = SimpleAnalyzer()
 
     id = db.Column(db.Integer(), primary_key=True, nullable=False)
     user = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
