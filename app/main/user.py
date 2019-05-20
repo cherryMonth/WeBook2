@@ -1,9 +1,10 @@
 # coding=utf-8
 
 from flask import render_template, redirect, flash, url_for, request, abort
-from flask import Blueprint, current_app, send_from_directory
-import os
+from flask import Blueprint, current_app, send_from_directory, Response
 import requests
+import base64
+from app.main.hbase import hbase
 import re
 from app.main.parse import Extractor
 import markdown
@@ -165,7 +166,8 @@ def upload_images():
     result = dict()
     _type = _file.filename.split(".")[-1].lower()
     filename = secure_filename(_file.filename)
-    _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], filename))
+    image = base64.b64encode(_file.read()).decode('utf8')
+    hbase.execute_insert('image', filename, ['image_type', 'image'], [_type, image])
     if not _type or _type not in ["jpg", "jpeg", "gif", "png", "bmp", "webp"]:
         result['success'] = 0
         result['message'] = u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png', 'webp'" \
@@ -175,16 +177,18 @@ def upload_images():
     else:
         result['success'] = 1
         result['message'] = u"上传成功!"
-        result['url'] = "http://www.webook.mobi/display_images/{}".format(filename)
+        result['url'] = "http://127.0.0.1:5000/display_images/{}".format(filename)
         return json.dumps(result)
 
 
 @user.route("/display_images/<filename>", methods=['GET'])
 def display_images(filename):
-    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + filename):
-        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], "-1.jpg")
-    else:
-        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], filename)
+    file_bytes = hbase.query_by_row('image', filename)
+    if file_bytes:
+        file_bytes = file_bytes[b'image:image']
+        result = base64.b64decode(file_bytes.decode())
+        return Response(result, mimetype='image/jpeg')
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
 
 
 @user.route('/get_category', methods=['GET', "POST"])
@@ -485,6 +489,7 @@ def topic_manager(key):
         domestic_list = Topic.query.filter_by(type_id=0, user_id=key).all()
         foreign_list = Topic.query.filter_by(type_id=1, user_id=key).all()
         unique_list = Topic.query.filter_by(type_id=2, user_id=key).all()
+    first_topic = None
     if domestic_list:
         first_topic = domestic_list[0]
     elif foreign_list:
@@ -525,5 +530,5 @@ def get_topic_info():
                         <span style="margin-left: 20px" class="flask-moment" data-timestamp="{}" data-format="fromNow(0)" data-refresh="0">{}</span>
                     </div>
                 """
-    return html.format(topic.image_name, topic.topic_name, topic.topic_info, user.id, user.id, user.id, user.username,
+    return html.format(topic.id, topic.topic_name, topic.topic_info, user.id, user.id, user.id, user.username,
                        topic.create_time, topic.create_time)
