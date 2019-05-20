@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from flask import redirect, flash, url_for, request, abort, send_from_directory
-from flask import Blueprint, current_app, session
+from flask import Blueprint, current_app, session, Response
 from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword, CreateTopic
 from flask_login import login_required, current_user
 from app import db
@@ -20,6 +20,8 @@ from app.main.auth import logout
 import cgi
 from tornado.ioloop import IOLoop
 import re
+import base64
+from app.main.hbase import hbase
 
 main = Blueprint("main", __name__)
 
@@ -292,7 +294,8 @@ def edit_file(key):
         # t.start()
         flash(u'保存成功！', 'success')
         return redirect(url_for('main.edit'))
-    return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list, unique_list=unique_list)
+    return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list,
+                           unique_list=unique_list)
 
 
 @main.route("/download/<key>", methods=['GET'])
@@ -453,25 +456,6 @@ def create_topic():
             topic.topic_name = form.topic_name.data
         topic.type_id = form.topic_id.data
         _file = request.files['filename'] if 'filename' in request.files else None
-
-        if _file:
-            _type = _file.filename.split(".")[-1].lower()
-
-            if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
-                flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
-                return redirect(url_for("main.create_topic"))
-
-            dirname = current_app.config['UPLOAD_FOLDER']  # 截图存放地点
-            topic.image_name = secure_filename(str(topic.topic_name) + "_topic_." + _type)
-            if not os.path.exists(dirname):
-                try:
-                    os.makedirs(dirname)
-                    _file.save(os.path.join(dirname, topic.image_name))
-                except Exception as e:
-                    print(e)
-            else:
-                _file.save(os.path.join(dirname, topic.image_name))
-
         topic.user_id = current_user.id
         topic.topic_info = form.topic_info.data
         info = Information()
@@ -484,7 +468,16 @@ def create_topic():
         db.session.add(info)
         db.session.add(topic)
         db.session.commit()
+        topic_id = Topic.query.filter_by(topic_name=topic.topic_name).first().id
+        if _file:
+            _type = _file.filename.split(".")[-1].lower()
 
+            if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
+                flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
+                return redirect(url_for("main.create_topic"))
+
+            image = base64.b64encode(_file.read()).decode('utf8')
+            hbase.execute_insert('image', 'topic_{}'.format(topic_id), ['image_type', 'image'], [_type, image])
         flash(u"创建成功", "success")
         return redirect(url_for("main.user_information", key=current_user.id))
     return render_template("edit/edit_topic.html", form=form)
@@ -514,18 +507,8 @@ def edit_basic():
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.edit_basic"))
-
-            dirname = current_app.config['UPLOAD_FOLDER']  # 截图存放地点
-            current_user.image_name = secure_filename(str(current_user.id) + "." + _type)
-            if not os.path.exists(dirname):
-                try:
-                    os.makedirs(dirname)
-                    _file.save(os.path.join(dirname, current_user.image_name))
-                except Exception as e:
-                    print(e)
-            else:
-                _file.save(os.path.join(dirname, current_user.image_name))
-
+            image = base64.b64encode(_file.read()).decode('utf8')
+            hbase.execute_insert('image', 'user_{}'.format(current_user.id), ['image_type', 'image'], [_type, image])
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         db.session.add(current_user)
@@ -633,28 +616,29 @@ def edit_comment(key):
 @login_required
 def response_comment(post_id, key):
     if request.method == "POST":
-        info = request.form["comment"]
-        if not Category.query.filter_by(id=post_id).first():
-            abort(404)
-        comment = Comment(body=cgi.escape(info), author_id=current_user.id, post_id=post_id)
-        comment.comment_user_id = key
-        _info = Information()
-        _info.time = datetime.datetime.utcnow()
-        _info.launch_id = current_user.id
-        category = Category.query.filter_by(id=post_id).first()
-        _info.receive_id = comment.comment_user_id
-        comment.timestamp = datetime.datetime.utcnow()
-        db.session.add(_info)
-        db.session.add(comment)
-        db.session.flush()
-        _info.info = u"用户" + current_user.username + u" 对您在" + u"<a style='color: #d82433' " \
-                                                               u"href='{}?check={}'>{}</a>".format(
-            u"/display/" + str(category.id), _info.id, category.title) + \
-                     u"的评论进行了回复!"
+        if request.method == "POST":
+            info = request.form["comment"]
+            if not Category.query.filter_by(id=post_id).first():
+                abort(404)
+            comment = Comment(body=cgi.escape(info), author_id=current_user.id, post_id=post_id)
+            comment.comment_user_id = key
+            _info = Information()
+            _info.time = datetime.datetime.utcnow()
+            _info.launch_id = current_user.id
+            category = Category.query.filter_by(id=post_id).first()
+            _info.receive_id = comment.comment_user_id
+            comment.timestamp = datetime.datetime.utcnow()
+            db.session.add(_info)
+            db.session.add(comment)
+            db.session.flush()
+            _info.info = u"用户" + current_user.username + u" 对您在" + u"<a style='color: #d82433' " \
+                                                                   u"href='{}?check={}'>{}</a>".format(
+                u"/display/" + str(category.id), _info.id, category.title) + \
+                         u"的评论进行了回复!"
 
-        db.session.commit()
-        flash(u"回复成功!", "success")
-        return redirect("/display/" + str(post_id))
+            db.session.commit()
+            flash(u"回复成功!", "success")
+            return redirect("/display/" + str(post_id))
 
 
 @main.route("/del_comment/<key>", methods=['GET', 'POST'])
@@ -703,17 +687,19 @@ def del_comment(key):
 
 @main.route("/show_image/<key>", methods=['GET', 'POST'])
 def show_image(key):
-    user = User.query.filter_by(id=key).first()
-    if not user:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
-    else:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], user.image_name)
+    file_bytes = hbase.query_by_row('image', 'user_' + key)
+    if file_bytes:
+        file_bytes = file_bytes[b'image:image']
+        result = base64.b64decode(file_bytes.decode())
+        return Response(result, mimetype='image/jpeg')
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
 
 
 @main.route("/show_topic_image/<key>", methods=['GET', 'POST'])
 def show_topic_image(key):
-    topic = Topic.query.filter_by(image_name=key).first()
-    if not topic:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
-    else:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], topic.image_name)
+    file_bytes = hbase.query_by_row('image', 'topic_' + key)
+    if file_bytes:
+        file_bytes = file_bytes[b'image:image']
+        result = base64.b64decode(file_bytes.decode())
+        return Response(result, mimetype='image/jpeg')
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")

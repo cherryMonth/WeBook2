@@ -157,7 +157,6 @@ class Topic(db.Model):
     user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
     type_id = db.Column(db.Integer, nullable=False)  # 国外 0 国内 1  主题 2
     topic_name = db.Column(db.String(64), unique=True)
-    image_name = db.Column(db.String(50), nullable=False)
     topic_info = db.Column(db.String(100))
     allowed = db.Column(db.Boolean, default=False, nullable=False)
     create_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
@@ -193,8 +192,6 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(64), unique=True, index=True)  # 添加索引
 
     confirmed = db.Column(db.Boolean, default=False)
-
-    image_name = db.Column(db.String(20), unique=True)
 
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
 
