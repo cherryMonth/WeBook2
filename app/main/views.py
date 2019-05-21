@@ -395,7 +395,7 @@ def find_file(key):
     for doc in hot_doc_list:
         doc.username = User.query.filter_by(id=doc.user).first().username
     if form.validate_on_submit():
-        doc_list = Category.query.whoosh_search(form.input.data).all()
+        doc_list = Category.query.whooshee_search(form.input.data).all()
 
         for doc in doc_list:
             doc.username = User.query.filter_by(id=doc.user).first().username

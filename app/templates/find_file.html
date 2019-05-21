@@ -10,6 +10,8 @@
     {{ super() }}
     <script src="{{ url_for('static',filename='js/jquery-1.11.1.min.js') }}"></script>
     <script src="{{ url_for('static',filename='bootstrap/js/bootstrap.js') }}"></script>
+    <link rel="stylesheet" href="http://apps.bdimg.com/libs/jqueryui/1.10.4/css/jquery-ui.min.css">
+    <script src="http://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 {% endblock %}
 
 {% block body %}
@@ -46,6 +48,17 @@
                 </div>
             </form>
         </div>
+        <script>
+
+            $(function () {
+                $("#input").autocomplete({
+                    source: "/autocomplete",
+                    minLength: 3, //进行提示的最小输入长度
+                    select: null  // 当用户选中当时候可以触发回调函数
+                });
+            });
+
+        </script>
 
         {% if hot_doc_list %}
             <div class="container text-center">

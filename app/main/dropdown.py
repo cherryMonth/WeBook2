@@ -3,6 +3,7 @@ from flask import Blueprint
 from flask_login import current_user
 import re
 from app.main.parse import Extractor
+import requests
 import markdown
 from sqlalchemy.sql import func
 from app.main.models import Category, Comment
@@ -45,8 +46,15 @@ def get_index_page():
                     </li>"""
         result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
         ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
-        result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
-        image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon",
+                      "image/vnd.microsoft.icon"]
+        tmp_url = None
+        for url in result:
+            response = requests.get(url[:-1])
+            if response.status_code == 200 and response.headers.get('Content-Type') in image_type:
+                tmp_url = url[:-1]
+                break
+        image_url = tmp_url or "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
         exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
                 'markdown.extensions.toc']
@@ -65,7 +73,7 @@ def get_index_page():
 
 @dropdown.route("/get_author_list", methods=['GET', 'POST'])
 def get_author_list():
-    key = User.query.filter(User.id>0).all()
+    key = User.query.filter(User.id > 0).all()
     key = list(map(lambda x: x.id, key))
     author_json_list = list()
     for k in key:
@@ -121,5 +129,14 @@ def get_author_list():
             _class = "user-follow-button"
             color = "white"
         author_json_list.append(
-            html.format(k, k, k,author['name'], author['word_count'], author['collect_num'], _class, url, color, string))
+            html.format(k, k, k, author['name'], author['word_count'], author['collect_num'], _class, url, color,
+                        string))
     return json.dumps(author_json_list)
+
+
+@dropdown.route('/autocomplete', methods=['GET', "POST"])
+def autocomplete():
+    info = request.args['term']
+    doc_list = Category.query.whooshee_search(info, order_by_relevance=10).all()
+    doc_list = list(map(lambda x: x.title, doc_list))
+    return json.dumps(doc_list)

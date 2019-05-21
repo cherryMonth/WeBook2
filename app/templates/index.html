@@ -231,7 +231,7 @@
                                 <li><a href="{{ url_for('main.index') }}">首页</a></li>
                                 <li><a href="{{ url_for('main.find_file', key=7) }}">发现</a></li>
                                 <li><a href="{{ url_for('user.find_user') }}">关注</a></li>
-                                <li><a href="{{ url_for('user.topic_manager', key=0) }}">主题专区</a></li>
+                                <li><a href="{{ url_for('user.topic_manager', key=0) }}">旅游攻略</a></li>
                                 {% if not current_user.is_anonymous %}
                                     <li style="margin-left:25%"><a
                                             href="{{ url_for('user.information', page=1) }}">消息<span
@@ -324,7 +324,7 @@
     </div>
     <div style="width:50%;margin-left: 250px;"> <!-- 如果需要全屏则需要把class=container去掉 -->
         <div id="demo-1"
-             data-zs-src='["/static/images/2.jpg", "/static/images/1.jpg", "/static/images/3.jpg","/static/images/4.jpg"]'
+             data-zs-src='["/static/images/first.jpeg", "/static/images/b.jpeg", "/static/images/c.jpeg","/static/images/d.jpeg"]'
              data-zs-overlay="dots">
             <div class="demo-inner-content">
                 <div class="header-w3-agileits" id="home">

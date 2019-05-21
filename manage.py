@@ -6,7 +6,6 @@ from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from app import db
 from app.main.models import Role
-from app.main.models import Category, User
 
 app = create_app("default")
 
