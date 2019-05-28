@@ -183,6 +183,7 @@ class Follow(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
 
 
+@whoosh.register_model('username')
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
 

@@ -19,7 +19,7 @@ def get_index_page():
     tmp = Category.query.order_by(Category.update_time.desc()).order_by(Category.rate.desc()). \
         order_by(Category.collect_num.desc())
     length = len(tmp.all())
-    target_page_num = 5
+    target_page_num = 3
     page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
     if _id > page_num:
         return '[]'

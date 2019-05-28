@@ -27,7 +27,7 @@ def find_user():
         text("SELECT * FROM webook.users ORDER BY collect_num DESC LIMIT 5 ;")).all()
 
     if form.validate_on_submit():
-        user_list = User.query.whoosh_search(form.input.data).all()
+        user_list = User.query.whooshee_search(form.input.data).all()
 
         length = len(user_list)
         if not user_list:
