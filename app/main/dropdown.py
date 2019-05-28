@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from flask import request
 from flask import Blueprint
 from flask_login import current_user
@@ -26,7 +28,7 @@ def get_index_page():
     hot_doc_list = tmp.paginate(_id, target_page_num, error_out=True).items
     docs_html_list = list()
     for doc in hot_doc_list:
-        html = """<li id="{}" class="have-img">
+        html = u"""<li id="{}" class="have-img">
                         <a class="warp-img" href="/display/{}">
                         <img class="  img-blur-done" src={} style="float:right;margin-right:37%" height=100 width=125>
                         </a>
@@ -77,7 +79,7 @@ def get_author_list():
     key = list(map(lambda x: x.id, key))
     author_json_list = list()
     for k in key:
-        html = """
+        html = u"""
             <a class="avatar" href="/user_information/{}">
                 <img src="/show_image/{}" class="round_icon" style="float:left"></a>
                 <div id="info" class="info">
@@ -100,7 +102,7 @@ def get_author_list():
                         </div>
                     </li>
                     <button data-v-test="" class="off {}" onclick="window.location.href='{}'
-        
+
                     ">
                 <i data-v-test="" class="iconfont">
                 </i>
@@ -120,12 +122,12 @@ def get_author_list():
         author['collect_num'] = collect_num
         if not current_user.is_anonymous and author_instance.is_followed_by(current_user):
             url = "/unfollowed_user/{}".format(k)
-            string = "取消关注"
+            string = u"取消关注"
             color = "#8c8c8c"
             _class = "user-unfollow-button"
         else:
             url = "/followed_user/{}".format(k)
-            string = "关注"
+            string = u"关注"
             _class = "user-follow-button"
             color = "white"
         author_json_list.append(

@@ -1,10 +1,10 @@
 # coding = utf-8
 
 import os
-import configparser
+import ConfigParser
 import sys
 
-cf = configparser.ConfigParser()
+cf = ConfigParser.ConfigParser()
 try:
     cf.read("./system.ini")
     os.environ['owner'] = cf.get("owner", "owner")

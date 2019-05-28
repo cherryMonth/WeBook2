@@ -349,22 +349,19 @@ class User(db.Model, UserMixin):
         return self.followers.filter_by(
             follower_id=user.id).first() is not None
 
+    class AnonymousUser(AnonymousUserMixin):
+        role_id = 3
 
-class AnonymousUser(AnonymousUserMixin):
-    role_id = 3
+        @staticmethod
+        def can():
+            return False
 
-    @staticmethod
-    def can():
-        return False
+        @staticmethod
+        def is_administrator():
+            return False
 
-    @staticmethod
-    def is_administrator():
-        return False
+    login_manager.anonymous_user = AnonymousUser
 
-
-login_manager.anonymous_user = AnonymousUser
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))

@@ -1,3 +1,4 @@
+# coding=utf-8
 from twisted.internet import reactor
 from twisted.web import server
 from twisted.web.wsgi import WSGIResource

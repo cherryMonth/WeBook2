@@ -200,7 +200,7 @@ def get_category():
     docs = temp.order_by(Category.id.desc()).paginate(_id, target_page_num, error_out=True).items
     docs_html_list = list()
     for doc in docs:
-        html = """<li id="{}" class="have-img">
+        html = u"""<li id="{}" class="have-img">
                     <a class="warp-img" href="/display/{}">
                     <img class="  img-blur-done" src={} style="float:right;margin-right:37%" height=100 width=125>
                     </a>
@@ -262,7 +262,7 @@ def get_topic_category():
     docs = temp.order_by(Category.id.desc()).paginate(num, target_page_num, error_out=True).items
     docs_html_list = list()
     for doc in docs:
-        html = """<li id="{}" class="have-img">
+        html = u"""<li id="{}" class="have-img">
                     <a class="warp-img" href="/display/{}">
                     <img class="  img-blur-done" src={} style="float:right;margin-right:37%" height=100 width=125>
                     </a>
@@ -320,7 +320,7 @@ def get_dynamics():
     info_list = tmp.paginate(_id, target_page_num, error_out=True).items
     info_html_list = list()
     for info in info_list:
-        html = """<li id="{}" class="have-img" style="margin-left: 22%">
+        html = u"""<li id="{}" class="have-img" style="margin-left: 22%">
                         <a class="avator" href="/user_information/{}">
                         <img class="round_icon" src={} style="float:left;">
                         </a>
@@ -385,7 +385,7 @@ from category, comment where category.id = comment.post_id and category.user = {
     recent_doc_list = recent_doc_list[target_page_num * _id - target_page_num:target_page_num]
     docs_html_list = list()
     for doc in recent_doc_list:
-        html = """<li id="{}" class="have-img">
+        html = u"""<li id="{}" class="have-img">
                             <a class="warp-img" href="/display/{}">
                             <img class="  img-blur-done" src={} style="float:right;margin-right:37%" height=100 width=125>
                             </a>
@@ -437,7 +437,7 @@ def get_hot():
     hot_doc_list = tmp.paginate(_id, target_page_num, error_out=True).items
     docs_html_list = list()
     for doc in hot_doc_list:
-        html = """<li id="{}" class="have-img">
+        html = u"""<li id="{}" class="have-img">
                         <a class="warp-img" href="/display/{}">
                         <img class="  img-blur-done" src={} style="float:right;margin-right:37%" height=100 width=125>
                         </a>
@@ -501,7 +501,7 @@ def get_topic_info():
     key = int(request.args.get('key'))
     topic = Topic.query.filter_by(id=key).first_or_404()
     user = User.query.filter_by(id=topic.user_id).first_or_404()
-    html = """<div style="float:left;">
+    html = u"""<div style="float:left;">
                     <a id="topic_info" class="warp-img">
                         <img id='topic_image' style="margin-left: 20px;"
                              src='/show_topic_image/{}'
