@@ -72,7 +72,7 @@ def work(_id, info):
         _file.write(tmp + "\n")
     _file.close()
     user_page[_id] = 'work'
-    IOLoop.instance().add_timeout(50, callback=pop, args=(_id,))
+    # IOLoop.instance().add_timeout(50, callback=pop, args=(_id,))
     os.system("pandoc {} --template eisvogel  --pdf-engine xelatex   -o {} -V CJKmainfont='SimSun'  "
               "--highlight-style pygments --listings ".format(filename, pdf_name))
 
@@ -356,7 +356,7 @@ def downloader(key):
                 "--highlight-style pygments --listings ".format(filename, pdf_name)
         import shlex
         popen = subprocess.Popen(shlex.split(shell), shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        IOLoop.instance().add_timeout(50, callback=pop, args=(str(p.id),))
+        # IOLoop.instance().add_timeout(50, callback=pop, args=(str(p.id),))
     else:
         print("have one working")
     count = 0
@@ -367,7 +367,7 @@ def downloader(key):
 
         elif count == 50:
             flash(u'导出失败, 请检查您的文档!(例如:图片格式只能使用jpg,png, Latex语法只支持XeLax!)', 'warning')
-            IOLoop.instance().add_timeout(0, callback=pop, args=(str(p.id),))
+            # IOLoop.instance().add_timeout(0, callback=pop, args=(str(p.id),))
             return redirect(url_for("main.my_doc", key=current_user.id, _id=1))
         else:
             if popen and popen.poll() is None:
@@ -377,7 +377,7 @@ def downloader(key):
                 if 'Error' in line or 'Warning' in line or "Could not" in line or 'WARNING' in line:
                     popen.terminate()
                     flash(u'导出失败, {}'.format(line), 'warning')
-                    IOLoop.instance().add_timeout(0, callback=pop, args=(str(p.id),))
+                    # IOLoop.instance().add_timeout(0, callback=pop, args=(str(p.id),))
                     return redirect(url_for("main.my_doc", key=current_user.id, _id=1))
             count += 1
             time.sleep(1)
