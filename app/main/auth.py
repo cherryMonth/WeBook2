@@ -5,6 +5,8 @@ from flask import Blueprint, current_app, session
 from werkzeug.utils import secure_filename
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
+from hbase import HBaseDBConnection
+import base64
 from ..email import send_email
 import os
 from app.main.forms import LoginForm, RegisterForm, ForgetForm
@@ -72,26 +74,16 @@ def register():
             flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
             return redirect(url_for("main.edit_basic"))
 
-        dirname = current_app.config['UPLOAD_FOLDER']  # 截图存放地点
-
         user = User(email=form.email.data, username=form.username.data,
                     password=form.password.data, about_me=form.about_me.data)
         db.session.add(user)
         db.session.commit()
 
         user_id = User.query.filter_by(username=user.username).first().id
-        filename = secure_filename(str(user_id) + "." + _type)
-        if not os.path.exists(dirname):
-            try:
-                os.makedirs(dirname)
-                _file.save(os.path.join(dirname, filename))
-            except Exception as e:
-                print (e)
-        else:
-            _file.save(os.path.join(dirname, filename))
-        user.image_name = filename
-        db.session.add(user)
-        db.session.commit()
+        image = base64.b64encode(_file.read()).decode('utf8')
+        hbase = HBaseDBConnection()
+        hbase.execute_insert('image', 'user_{}'.format(user_id), ['image_type', 'image'], [_type, image])
+        hbase.dbpool.close()
         token = str(user.generate_confirmation_token())
         send_email([user.email], u'验证您的账号',
                    'auth/email/confirm', user=user, token=token)

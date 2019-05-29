@@ -1,9 +1,11 @@
 # coding=utf-8
 
-from flask import render_template, redirect, flash, url_for, request, abort
+from flask import render_template, redirect, flash, url_for, request, abort, Response
 from flask import Blueprint, current_app, send_from_directory
 import os
 import requests
+from hbase import HBaseDBConnection
+import base64
 import re
 from app.main.parse import Extractor
 import markdown
@@ -165,7 +167,10 @@ def upload_images():
     result = dict()
     _type = _file.filename.split(".")[-1].lower()
     filename = secure_filename(_file.filename)
-    _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], filename))
+    image = base64.b64encode(_file.read()).decode('utf8')
+    hbase = HBaseDBConnection()
+    hbase.execute_insert('image', filename, ['image_type', 'image'], [_type, image])
+    hbase.dbpool.close()
     if not _type or _type not in ["jpg", "jpeg", "gif", "png", "bmp", "webp"]:
         result['success'] = 0
         result['message'] = u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png', 'webp'" \
@@ -181,10 +186,14 @@ def upload_images():
 
 @user.route("/display_images/<filename>", methods=['GET'])
 def display_images(filename):
-    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + filename):
-        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], "-1.jpg")
-    else:
-        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], filename)
+    hbase = HBaseDBConnection()
+    file_bytes = hbase.query_by_row('image', filename)
+    hbase.dbpool.close()
+    if file_bytes:
+        file_bytes = file_bytes[b'image:image']
+        result = base64.b64decode(file_bytes.decode())
+        return Response(result, mimetype='image/jpeg')
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
 
 
 @user.route('/get_category', methods=['GET', "POST"])

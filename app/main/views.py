@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from flask import redirect, flash, url_for, request, abort, send_from_directory
+from flask import redirect, flash, url_for, request, abort, send_from_directory, Response
 from flask import Blueprint, current_app, session
 from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword, CreateTopic
 from flask_login import login_required, current_user
@@ -15,7 +15,8 @@ import time
 from sqlalchemy import text
 from sqlalchemy.sql import func
 import subprocess
-import threading
+from hbase import HBaseDBConnection
+import base64
 from app.main.auth import logout
 import cgi
 # from tornado.ioloop import IOLoop
@@ -292,7 +293,8 @@ def edit_file(key):
         # t.start()
         flash(u'保存成功！', 'success')
         return redirect(url_for('main.edit'))
-    return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list, unique_list=unique_list)
+    return render_template('edit.html', form=form, domestic_list=domestic_list, foreign_list=foreign_list,
+                           unique_list=unique_list)
 
 
 @main.route("/download/<key>", methods=['GET'])
@@ -514,18 +516,10 @@ def edit_basic():
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.edit_basic"))
-
-            dirname = current_app.config['UPLOAD_FOLDER']  # 截图存放地点
-            current_user.image_name = secure_filename(str(current_user.id) + "." + _type)
-            if not os.path.exists(dirname):
-                try:
-                    os.makedirs(dirname)
-                    _file.save(os.path.join(dirname, current_user.image_name))
-                except Exception as e:
-                    print(e)
-            else:
-                _file.save(os.path.join(dirname, current_user.image_name))
-
+            image = base64.b64encode(_file.read()).decode('utf8')
+            hbase = HBaseDBConnection()
+            hbase.execute_insert('image', 'user_{}'.format(current_user.id), ['image_type', 'image'], [_type, image])
+            hbase.dbpool.close()
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         db.session.add(current_user)
@@ -703,17 +697,23 @@ def del_comment(key):
 
 @main.route("/show_image/<key>", methods=['GET', 'POST'])
 def show_image(key):
-    user = User.query.filter_by(id=key).first()
-    if not user:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
-    else:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], user.image_name)
+    hbase = HBaseDBConnection()
+    file_bytes = hbase.query_by_row('image', 'user_' + key)
+    hbase.dbpool.close()
+    if file_bytes:
+        file_bytes = file_bytes[b'image:image']
+        result = base64.b64decode(file_bytes.decode())
+        return Response(result, mimetype='image/jpeg')
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
 
 
 @main.route("/show_topic_image/<key>", methods=['GET', 'POST'])
 def show_topic_image(key):
-    topic = Topic.query.filter_by(image_name=key).first()
-    if not topic:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
-    else:
-        return send_from_directory(current_app.config['UPLOAD_FOLDER'], topic.image_name)
+    hbase = HBaseDBConnection()
+    file_bytes = hbase.query_by_row('image', 'topic_' + key)
+    hbase.dbpool.close()
+    if file_bytes:
+        file_bytes = file_bytes[b'image:image']
+        result = base64.b64decode(file_bytes.decode())
+        return Response(result, mimetype='image/jpeg')
+    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")

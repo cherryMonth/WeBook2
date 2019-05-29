@@ -1,147 +1,150 @@
 {% extends "index.html" %}
 
 {% block title %}
-我的消息
+    我的消息
 {% endblock %}
 
 {% block styles %}
-{{super()}}
-<script src="{{ url_for('static',filename='js/jquery-1.11.1.min.js') }}"></script>
-<script src="{{ url_for('static',filename='js/moment-with-locales.min.js') }}"></script>
-<script src="{{ url_for('static',filename='bootstrap/js/bootstrap.js') }}"></script>
+    {{ super() }}
+    <script src="{{ url_for('static',filename='js/jquery-1.11.1.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='js/moment-with-locales.min.js') }}"></script>
+    <script src="{{ url_for('static',filename='bootstrap/js/bootstrap.js') }}"></script>
 {% endblock %}
 
 {% block body %}
 
-{% block navbar %}
-{{super()}}
-{% endblock navbar %}
-{% block message %}
-<div class="container" id="flash" style="text-align:center;margin-top:1%">
-    <div class="row clearfix">
-        {% for message in get_flashed_messages(with_categories=True) %}
-        {% if message[1] != 'Please log in to access this page.' %}
-        <div class="alert alert-{{ message[0] }}">
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-            {{ message[1] }}
+    {% block navbar %}
+        {{ super() }}
+    {% endblock navbar %}
+    {% block message %}
+        <div class="container" id="flash" style="text-align:center;margin-top:1%">
+            <div class="row clearfix">
+                {% for message in get_flashed_messages(with_categories=True) %}
+                    {% if message[1] != 'Please log in to access this page.' %}
+                        <div class="alert alert-{{ message[0] }}">
+                            <button type="button" class="close" data-dismiss="alert">&times;</button>
+                            {{ message[1] }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
         </div>
-        {% endif %}
-        {% endfor %}
-    </div>
-</div>
-{% endblock message %}
+    {% endblock message %}
 
-{% block content %}
-<div class="container" style="margin-top:2%;">
-    {% if length > 0 %}
-    <h1>当前共有{{length}}个与您有关的信息!</h1>
-    <table class='table table-hover' id="my_table">
-        <tr>
-            <th>发送方</th>
-            <th>内容</th>
-            <th>发送时间</th>
-            <th>状态</th>
-            <th>操作</th>
-        </tr>
-        {% for info in info_list %}
-        <tr id="{{info_list.index(info) + 1}}">
-            <td style="word-wrap:break-word;width:20%">
-                <img src="/show_image/{{info['launch_id']}}" style="height: 30px;width: 30px">
-                <a href="/user_information/{{info['launch_id']}}" style="color: blue;">&nbsp;{{info['author'].username}}</a>
-            </td>
-            <td style="color: black;word-wrap:break-word;width: 45%">
-                {{ info['info'] | safe}}
-            </td>
-            <td style="color: black;word-wrap:break-word;width:15%">
-                <div class="text-center">{{ moment(info['time']).fromNow() }}</div>
-            </td>
-            <td style="color: black;word-wrap:break-word;width:10%">
-                {% if info['confirm'] == True %}
-                已查看
-                {% else %}
-                未查看
-                {% endif %}
-            </td>
-            <td style="word-wrap:break-word;width:10%">
-                {% if info.confirm != True %}
-                <a href='/info_confirm/{{info.id}}/{{ page }}'>已阅</a>
-                {% endif %}
-                <a href='/del_info/{{info.id}}/{{ page }}' style="margin-left: 5%">删除</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
-    <div style="margin-left:30%;margin-top:5%" id="barcon">
-        {% if page == 1 %}
-        <a href="{{ url_for('user.information', page=page) }}">&lt;上一页&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-        {% else %}
-        <a href="{{ url_for('user.information', page=page - 1) }}">&lt;上一页&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-        {% endif %}
-        {% for index in range(1, page_num + 1) %}
-        {% if index == page %}
-        <a style="color: #c59a6d;font-weight:bold;"
-           href="{{ url_for('user.information', page=index) }}">{{ index }}&nbsp;&nbsp;&nbsp;</a>
-        {% else %}
-        <a href="{{ url_for('user.information', page=index) }}">{{ index }}&nbsp;&nbsp;&nbsp;</a>
-        {% endif %}
-        {% endfor %}
-        {% if page == page_num %}
-        <a href="{{ url_for('user.information', page=page) }}">下一页&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-        {% else %}
-        <a href="{{ url_for('user.information', page=page + 1) }}">下一页&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</a>
-        {% endif %}
-    </div>
-    {% else %}
-    <h3>好遗憾啊,当前还没有与您有关的消息。</h3>
-    {% endif %}
-</div>
-{% endblock %}
+    {% block content %}
+        <div class="table-responsive container" style="width: 1500px">
+            {% if length > 0 %}
+                <h1>当前共有{{ length }}个与您有关的信息!</h1>
+                <table class="table table-hover" id="my_table">
+                    <tr>
+                        <th scope="col">发送方</th>
+                        <th scope="col">内容</th>
+                        <th scope="col">发送时间</th>
+                        <th scope="col">状态</th>
+                        <th scope="col">操作</th>
+                    </tr>
+                    {% for info in info_list %}
+                        <tr id="{{ info_list.index(info) + 1 }}">
+                            <td style="word-wrap:break-word;width:20%">
+                                <img src="/show_image/{{ info['launch_id'] }}" style="height: 30px;width: 30px">
+                                <a href="/user_information/{{ info['launch_id'] }}"
+                                   style=" color: black;cursor: pointer;">&nbsp;{{ info['author'].username }}</a>
+                            </td>
+                            <td style="color: black;word-wrap:break-word;width: 45%">
+                                {{ info['info'] | safe }}
+                            </td>
+                            <td style="color: black;word-wrap:break-word;width:15%">
+                                <div class="text-center">{{ moment(info['time']).fromNow() }}</div>
+                            </td>
+                            <td style="color: black;word-wrap:break-word;width:10%">
+                                {% if info['confirm'] == True %}
+                                    已查看
+                                {% else %}
+                                    未查看
+                                {% endif %}
+                            </td>
+                            <td style="word-wrap:break-word;width:10%">
+                                {% if info.confirm != True %}
+                                    <a class="btn btn-default" href='/info_confirm/{{ info.id }}/{{ page }}'>已阅</a>
+                                {% endif %}
+                                <a class="btn-warning" href='/del_info/{{ info.id }}/{{ page }}' style="margin-left: 5%">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+                <div style="margin-left:45%;margin-top:5%" id="barcon">
+                    <ul class="pagination">
+                        {% if page == 1 %}
+                            <li><a href="{{ url_for('user.information', page=page) }}">&laquo;</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('user.information', page=page - 1) }}">&laquo;</a></li>
+                        {% endif %}
+                        {% for index in range(1, page_num + 1) %}
+                            {% if index == page %}
+                                <li class="active"><a
+                                        href="{{ url_for('user.information', page=index) }}">{{ index }}</a></li>
+                            {% else %}
+                                <li><a href="{{ url_for('user.information', page=index) }}">{{ index }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if page == page_num %}
+                            <li><a href="{{ url_for('user.information', page=page) }}">&raquo;</a></li>
+                        {% else %}
+                            <li><a href="{{ url_for('user.information', page=page + 1) }}">&raquo;</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            {% else %}
+                <h3>好遗憾啊,当前还没有与您有关的消息。</h3>
+            {% endif %}
+        </div>
+    {% endblock %}
 
-{% block footer %}
-{{super()}}
-{% endblock footer %}
+    {% block footer %}
+        {{ super() }}
+    {% endblock footer %}
 
-{% block content_script %}
-<script>
+    {% block content_script %}
+        <script>
 
-    moment.locale("zh_CN");
+            moment.locale("zh_CN");
 
-    function flask_moment_render(elem) {
-        elem.innerHTML = eval('moment("' + elem.dataset.timestamp + '").' + elem.dataset.format + ';');
-        elem.classList.remove('flask-moment')
-        elem.style.display = 'inline';
-    }
-
-    function flask_moment_render_all() {
-        elems = Array.from(document.getElementsByClassName('flask-moment'));
-        for (var i = 0; i < elems.length; i++) {
-            elem = elems[i];
-            flask_moment_render(elem);
-            if (elem.dataset.refresh > 0) {
-                setInterval(function () {
-                    flask_moment_render(this);
-                }.bind(elem), parseInt(elem.dataset.refresh));
+            function flask_moment_render(elem) {
+                elem.innerHTML = eval('moment("' + elem.dataset.timestamp + '").' + elem.dataset.format + ';');
+                elem.classList.remove('flask-moment')
+                elem.style.display = 'inline';
             }
-        }
-    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        flask_moment_render_all();
-    });
-
-    $(document).ready(function () {
-        $(".dropdown").hover(
-            function () {
-                $('.dropdown-menu', this).stop(true).slideDown("fast");
-                $(this).toggleClass('open');
-            },
-            function () {
-                $('.dropdown-menu', this).stop(true).slideUp("fast");
-                $(this).toggleClass('open');
+            function flask_moment_render_all() {
+                elems = Array.from(document.getElementsByClassName('flask-moment'));
+                for (var i = 0; i < elems.length; i++) {
+                    elem = elems[i];
+                    flask_moment_render(elem);
+                    if (elem.dataset.refresh > 0) {
+                        setInterval(function () {
+                            flask_moment_render(this);
+                        }.bind(elem), parseInt(elem.dataset.refresh));
+                    }
+                }
             }
-        );
-    });
-</script>
-{% endblock content_script %}
+
+            document.addEventListener('DOMContentLoaded', function () {
+                flask_moment_render_all();
+            });
+
+            $(document).ready(function () {
+                $(".dropdown").hover(
+                    function () {
+                        $('.dropdown-menu', this).stop(true).slideDown("fast");
+                        $(this).toggleClass('open');
+                    },
+                    function () {
+                        $('.dropdown-menu', this).stop(true).slideUp("fast");
+                        $(this).toggleClass('open');
+                    }
+                );
+            });
+        </script>
+    {% endblock content_script %}
 
 {% endblock %}
