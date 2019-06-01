@@ -75,22 +75,22 @@
                 <div style="margin-left:45%;margin-top:5%" id="barcon">
                     <ul class="pagination">
                         {% if page == 1 %}
-                            <li><a href="{{ url_for('user.information', page=page) }}">&laquo;</a></li>
+                            <li><a href="{{ url_for('users.information', page=page) }}">&laquo;</a></li>
                         {% else %}
-                            <li><a href="{{ url_for('user.information', page=page - 1) }}">&laquo;</a></li>
+                            <li><a href="{{ url_for('users.information', page=page - 1) }}">&laquo;</a></li>
                         {% endif %}
                         {% for index in range(1, page_num + 1) %}
                             {% if index == page %}
                                 <li class="active"><a
-                                        href="{{ url_for('user.information', page=index) }}">{{ index }}</a></li>
+                                        href="{{ url_for('users.information', page=index) }}">{{ index }}</a></li>
                             {% else %}
-                                <li><a href="{{ url_for('user.information', page=index) }}">{{ index }}</a></li>
+                                <li><a href="{{ url_for('users.information', page=index) }}">{{ index }}</a></li>
                             {% endif %}
                         {% endfor %}
                         {% if page == page_num %}
-                            <li><a href="{{ url_for('user.information', page=page) }}">&raquo;</a></li>
+                            <li><a href="{{ url_for('users.information', page=page) }}">&raquo;</a></li>
                         {% else %}
-                            <li><a href="{{ url_for('user.information', page=page + 1) }}">&raquo;</a></li>
+                            <li><a href="{{ url_for('users.information', page=page + 1) }}">&raquo;</a></li>
                         {% endif %}
                     </ul>
                 </div>

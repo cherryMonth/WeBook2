@@ -18,7 +18,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import text
 import json
 
-user = Blueprint("user", __name__)
+user = Blueprint("users", __name__)
 
 
 @user.route("/find_user", methods=['POST', 'GET'])
@@ -34,7 +34,7 @@ def find_user():
         length = len(user_list)
         if not user_list:
             flash(u"没有找到符合要求的用户!", "warning")
-            return redirect(url_for("user.find_user"))
+            return redirect(url_for("users.find_user"))
 
         return render_template("find_user.html", form=form, user_list=user_list, length=length)
     return render_template("find_user.html", form=form, hot_user_list=hot_user_list)
@@ -105,7 +105,7 @@ def confirm(key, page):
         flash(u"信息确认成功!", "success")
         db.session.add(info)
         db.session.commit()
-    return redirect(url_for("user.information", page=page))
+    return redirect(url_for("users.information", page=page))
 
 
 @user.route("/del_info/<int:key>/<int:page>", methods=['GET', 'POST'])
@@ -121,7 +121,7 @@ def del_info(key, page):
         flash(u"信息删除成功!", "success")
         db.session.delete(info)
         db.session.commit()
-    return redirect(url_for("user.information", page=page))
+    return redirect(url_for("users.information", page=page))
 
 
 @user.route("/get_user_info/", methods=['GET', 'POST'])
