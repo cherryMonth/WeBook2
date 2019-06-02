@@ -5,7 +5,6 @@ from flask import Blueprint, current_app, session
 from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword, CreateTopic
 from flask_login import login_required, current_user
 from app import db
-from werkzeug.utils import secure_filename
 from app.main.models import Category, Favorite, User, Comment, Topic, Information
 import datetime
 from ..email import send_email
@@ -455,7 +454,7 @@ def create_topic():
         topic.topic_name = form.topic_name.data
         topic.topic_info = form.topic_info.data
         topic.type_id = form.topic_id.data
-
+        topic.image_name = "null"
         _file = request.files['filename'] if 'filename' in request.files else None
 
         if _file:
@@ -483,7 +482,7 @@ def create_topic():
         hbase.execute_insert('image', 'topic_{}'.format(topic_id), ['image_type', 'image'], ['png', image])
         hbase.dbpool.close()
         flash(u"创建成功", "success")
-        return redirect(url_for("user.topic_manager", key=current_user.id))
+        return redirect(url_for("users.topic_manager", key=current_user.id))
     return render_template("edit/edit_topic.html", form=form)
 
 

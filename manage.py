@@ -1,17 +1,23 @@
 # coding=utf-8
+
 from twisted.internet import reactor
 from twisted.web import server
 from twisted.web.wsgi import WSGIResource
 from twisted.python import log
 from app.main.hbase import HBaseDBConnection
 import sys
-from flask_admin import Admin, expose
+from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 import os
-from flask_login import current_user, login_required
+from flask_login import current_user
 from flask import redirect, url_for, request
 from app import create_app, db
-from app.main.models import User, Category, Comment, Topic
+from app.main.models import User, Category, Comment, Topic, Favorite
+
+import sys
+
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 log.startLogging(sys.stdout)
 app = create_app('default')
@@ -36,31 +42,8 @@ admin.add_view(MyModelView(Category, db.session, name='category_manager'))
 admin.add_view(MyModelView(Comment, db.session, name='comment_manager'))
 admin.add_view(MyModelView(User, db.session, name='user_manager'))
 
-
-def produce_user():
-    for i in range(1, 100):
-        import base64
-        import random
-        hbase = HBaseDBConnection()
-        image_num = random.randint(1, 28)
-        file = open("img/" + str(image_num) + ".png", 'rb')
-        user = User(email="111506445{}@qq.com".format(i), username=u"测试用户{}".format(i),
-                    password="123456")
-        db.session.add(user)
-        db.session.commit()
-        image = base64.b64encode(file.read()).decode('utf8')
-        user_id = User.query.filter_by(username=u"测试用户{}".format(i)).first().id
-        hbase.execute_insert('image', 'user_{}'.format(user_id), ['image_type', 'image'], ['png', image])
-        hbase.dbpool.close()
-
-
-def produce_category():
-    pass
-
-
 with app.app_context():
     db.create_all()
-
 
 resource = WSGIResource(reactor, reactor.getThreadPool(), app)
 site = server.Site(resource)

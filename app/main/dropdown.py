@@ -2,9 +2,11 @@
 
 from flask import request
 from flask import Blueprint
+import pickle
 from flask_login import current_user
 import re
 from app.main.parse import Extractor
+import random
 import requests
 import markdown
 from sqlalchemy.sql import func
@@ -13,6 +15,8 @@ from app.main.models import User
 import json
 
 dropdown = Blueprint("dropdown", __name__)
+
+algo = pickle.load(open('model.pkl', 'rb'))
 
 
 @dropdown.route("/get_index_page", methods=['GET', 'POST'])
@@ -75,8 +79,20 @@ def get_index_page():
 
 @dropdown.route("/get_author_list", methods=['GET', 'POST'])
 def get_author_list():
-    key = User.query.filter(User.id > 0).all()[:3]
-    key = list(map(lambda x: x.id, key))
+
+    user = str(current_user.id)
+    # 取出来对应的内部user id => to_inner_uid
+    playlist_inner_id = algo.trainset.to_inner_uid(user)
+    print("内部id", playlist_inner_id)
+
+    playlist_neighbors = algo.get_neighbors(playlist_inner_id, k=100)
+
+    author_id_list = random.sample(playlist_neighbors, 3)
+    # to_raw_uid映射回去
+    playlist_neighbors = (algo.trainset.to_raw_uid(inner_id)
+                          for inner_id in author_id_list)
+
+    key = [User.query.filter_by(id=int(author)).first().id for author in playlist_neighbors]
     author_json_list = list()
     for k in key:
         html = u"""

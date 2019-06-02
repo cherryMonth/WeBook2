@@ -313,6 +313,7 @@
             });
         }
     </script>
+    {% if current_user.is_authenticated %}
     <div style="float: right;margin-top: 5%;margin-right:100px" onclick="f2()">
         <span style="text-align: left;">推荐作者</span>
         <li id='rotate' class="glyphicon glyphicon-refresh rotate_i"
@@ -322,6 +323,7 @@
         <ul id="author_list">
         </ul>
     </div>
+    {% endif %}
     <div style="width:50%;margin-left: 250px;"> <!-- 如果需要全屏则需要把class=container去掉 -->
         <div id="demo-1"
              data-zs-src='["/static/images/first.jpeg", "/static/images/b.jpeg", "/static/images/c.jpeg","/static/images/d.jpeg"]'

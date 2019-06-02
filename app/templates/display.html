@@ -195,10 +195,10 @@
     {% block content %}
         <div style="float: left;margin-top: 5%;margin-left: 20px;"><p class="title name">WeBook评分{{ rate }}</p>
             <p class="title name">{{ people_num }}人参与了评分</p>
-            <div id="main" style="width: 300px;height:200px;float: right;">
-            </div>
             <p>地理位置: {{ location or '暂无' }}</p>
-            <button class="btn btn-hollow" onclick="f1(this)">显示导航地图</button>
+            <div id="main" style="width: 300px;height:200px;float: left;">
+            </div>
+            <button class="btn btn-hollow" onclick="f1(this)"  STYLE="MARGIN-TOP: 35%">显示导航地图</button>
         </div>
         <script>
             var myChart = echarts.init(document.getElementById('main'));
@@ -267,6 +267,7 @@
                     panel.setAttribute('id', 'panel');
                     document.getElementById('father').appendChild(container);
                     document.getElementById('father').appendChild(panel);
+                    console.log('开始获取经纬度');
                     if (navigator.geolocation) {  //如果浏览器支持获取地理信息
                         navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
                     } else {
