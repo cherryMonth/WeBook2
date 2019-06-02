@@ -76,106 +76,110 @@
     {% endblock message %}
 
     {% block content %}
-        <div class="main" style="margin-left:15%;width:300px; overflow-y:scroll">
-            <ul class="nav">
-                <li><a style="color: #c59a6d" href="{{ url_for('main.edit_basic') }}">修改基础信息</a></li>
-                <li><a href="{{ url_for('main.edit_password') }}">修改密码</a></li>
-                <li><a href="{{ url_for('main.edit_email') }}">解绑邮箱</a></li>
-                <li><a href="{{ url_for('users.my_follow') }}">我关注的人</a></li>
-                <li><a href="{{ url_for('users.follow_me') }}">关注我的人</a></li>
-                <li><a href="{{ url_for('main.create_topic') }}">创建主题</a></li>
-            </ul>
-        </div>
-        <div class="main" style="margin-left:10%;height: 700px; width: 650px;border-style: outset;vertical-align:top">
-            <div style="font-size:30px;">
-                <a style="margin-left:40%;color:#ea6f5a;padding: 10px;border-bottom: 2px solid #ea6f5a;">创建主题信息</a>
+        {% if topic_id %}
+            <div class="main"
+                 style="margin-left:30%;height: 1100px; width: 650px;border-style: outset;vertical-align:top">
+        {% else %}
+            <div class="main"
+                 style="margin-left:30%;height: 720px; width: 650px;border-style: outset;vertical-align:top">
+        {% endif %}
+    <div style="font-size:30px;">
+        <a style="margin-left:40%;color:#ea6f5a;padding: 10px;border-bottom: 2px solid #ea6f5a;">创建主题信息</a>
+    </div>
+    <div class="col-sm-5">
+        <form id="form" method="post" class="form" enctype=multipart/form-data onsubmit="return checkinfo()">
+            <div class="form-group" style="color:red;width:370px;margin-top:25%">
+                {{ form.topic_name.label(class="control-label", style="color:black") }}
+                {{ form.topic_name(required='true',class="form-control", value=topic_name) }}
             </div>
-            <div class="alert alert-warning" style="margin-top: 20px">注意：主题一旦创建无法修改，删除需要联系管理员！</div>
-            <div class="col-sm-5">
-                <form id="form" method="post" class="form" enctype=multipart/form-data onsubmit="return checkinfo()">
-                    <div class="form-group" style="color:red;width:370px;margin-top:25%">
-                        {{ form.topic_name.label(class="control-label", style="color:black") }}
-                        {{ form.topic_name(required='true',class="form-control") }}
-                    </div>
-                    <div class="form-group" style="color:red;width:370px;margin-top:5%">
-                        {{ form.filename.label(required, class="form-label", style="color:black", title="好的图片可以引起别人发文的欲望哦...") }}
-                        {{ form.filename(required='true',class="form-control") }}
-                    </div>
-                    <div class="form-group" style="color:red;width:370px;margin-top:5%">
-                        {{ form.topic_id.label(class="form-label", style="color:black") }}
-                        {{ form.topic_id(required='true',class="form-control") }}
-                    </div>
-
-                    <div class="form-group" style="color:red;width:370px;margin-top:25%">
-                        {{ form.topic_info.label(class="form-label", style="color:black") }}
-                        {{ form.topic_info(required='true',class="form-control") }}
-                    </div>
-
-                    <div class="form-group" style="margin-left:50%;margin-top:20%">
-                        {{ form.submit(class="sign-in-button", style="margin-top:20%;width:400px;height:60px;") }}
-                    </div>
-                </form>
+            <div class="form-group" style="color:red;width:370px;margin-top:5%">
+                {{ form.filename.label(required, class="form-label", style="color:black", title="好的图片可以引起别人发文的欲望哦...") }}
+                {% if topic_id %}
+                    <img src="/show_topic_image/{{ topic_id }}"
+                         style="margin-top:10%; margin-bottom:10%;width: 400px;height: 270px;">
+                {% endif %}
+                {{ form.filename(class="form-control", required="false") }}
             </div>
-        </div>
+            <div class="form-group" style="color:red;width:370px;margin-top:5%">
+                {{ form.topic_id.label(class="form-label", style="color:black") }}
+                {{ form.topic_id(required='true',class="form-control") }}
+            </div>
+            <script type="text/javascript">
+                document.getElementById('topic_id').value = "{{ topic_type_id }}";
+            </script>
+            <div class="form-group" style="color:red;width:370px;margin-top:10%">
+                {{ form.topic_info.label(class="form-label", style="color:black") }}
+                <textarea class="form-control" style="height:200px;overflow-y:scroll"
+                          id="topic_info" name="topic_info"
+                          placeholder="仅限于100字以内..."
+                          minlength="0" maxlength="100">{{ topic_info }}</textarea>
+            </div>
+
+            <div class="form-group" style="margin-left:50%;margin-top:20%">
+                {{ form.submit(class="sign-in-button", style="margin-top:20%;width:400px;height:60px;") }}
+            </div>
+        </form>
+    </div>
+    </div>
     {% endblock content %}
 
-    {% block footer %}
-        {{ super() }}
-    {% endblock footer %}
+{% block footer %}
+    {{ super() }}
+{% endblock footer %}
 
-    {% block content_script %}
-        <script>
-            $(document).ready(function () {
-                $(".dropdown").hover(
-                    function () {
-                        $('.dropdown-menu', this).stop(true).slideDown("fast");
-                        $(this).toggleClass('open');
-                    },
-                    function () {
-                        $('.dropdown-menu', this).stop(true).slideUp("fast");
-                        $(this).toggleClass('open');
-                    }
-                );
-            });
-
-            function checkinfo() {
-                window.onbeforeunload = null;
-                var obj = document.getElementById("filename");
-                var len = obj.files.length;
-                var text = "";
-
-                Array.prototype.contains = function (obj) {
-                    var i = this.length;
-                    while (i--) {
-                        if (this[i] === obj) {
-                            return true;
-                        }
-                    }
-                    return false;
+{% block content_script %}
+    <script>
+        $(document).ready(function () {
+            $(".dropdown").hover(
+                function () {
+                    $('.dropdown-menu', this).stop(true).slideDown("fast");
+                    $(this).toggleClass('open');
+                },
+                function () {
+                    $('.dropdown-menu', this).stop(true).slideUp("fast");
+                    $(this).toggleClass('open');
                 }
+            );
+        });
 
-                for (var i = 0; i < len; i++) {
-                    size = obj.files[i].size / 1024 / 1024;
-                    size = size.toFixed(2);
+        function checkinfo() {
+            window.onbeforeunload = null;
+            var obj = document.getElementById("filename");
+            var len = obj.files.length;
+            var text = "";
 
-                    var extend = obj.files[i].name.split('.').pop().toLowerCase();
-
-                    if (!['png', 'jpg', 'jpeg', "bmp"].contains(extend)) {
-                        text += "文件:" + obj.files[i].name + "上传头像失败! (图片允许格式为：png, jpg, jpeg, bmp)。\n"
-                    }
-
-                    if (size >= 4) {
-                        text += "文件:" + obj.files[i].name + " ,大小:" + size + "M, 系统最大支持4M。\n";
+            Array.prototype.contains = function (obj) {
+                var i = this.length;
+                while (i--) {
+                    if (this[i] === obj) {
+                        return true;
                     }
                 }
-                if (text.length === 0)
-                    return true;
-                else {
-                    alert(text);
-                    return false;
+                return false;
+            }
+
+            for (var i = 0; i < len; i++) {
+                size = obj.files[i].size / 1024 / 1024;
+                size = size.toFixed(2);
+
+                var extend = obj.files[i].name.split('.').pop().toLowerCase();
+
+                if (!['png', 'jpg', 'jpeg', "bmp"].contains(extend)) {
+                    text += "文件:" + obj.files[i].name + "上传头像失败! (图片允许格式为：png, jpg, jpeg, bmp)。\n"
+                }
+
+                if (size >= 4) {
+                    text += "文件:" + obj.files[i].name + " ,大小:" + size + "M, 系统最大支持4M。\n";
                 }
             }
-        </script>
-    {% endblock content_script %}
+            if (text.length === 0)
+                return true;
+            else {
+                alert(text);
+                return false;
+            }
+        }
+    </script>
+{% endblock content_script %}
 
 {% endblock body %}

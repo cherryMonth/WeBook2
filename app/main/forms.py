@@ -1,5 +1,6 @@
 # coding=utf-8
-from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, SubmitField, PasswordField, BooleanField, FileField
+from wtforms import StringField, TextAreaField, SelectField, SelectMultipleField, SubmitField, PasswordField, \
+    BooleanField, FileField
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Length
 from app.main.models import Category
@@ -9,7 +10,7 @@ class PostForm(FlaskForm):
     title = StringField("", render_kw={'placeholder': u'主题(仅限于30字内...)'})
     location = StringField("", render_kw={'placeholder': u'地理位置(仅限于50字内...可选)'})
     text = TextAreaField("", [DataRequired(), Length(max=10000)])
-    topic = StringField("", '文章主题', render_kw={'placeholder': u'为您的文章选个有趣的主题吧...'})
+    topic = StringField("", u'文章主题', render_kw={'placeholder': u'为您的文章选个有趣的主题吧...'})
     topic_id = SelectMultipleField('Topic_id', coerce=int)
     submit = SubmitField(u"发布文章")
 
@@ -23,7 +24,8 @@ class PostForm(FlaskForm):
             self.location.data = location
         if topic:
             self.topic.data = topic
-        self.topic_id.choices = [(0, "国内主题"), (1,"国外主题"), (2, "特色主题")]
+        self.topic_id.choices = [(0, u"国内主题"), (1, u"国外主题"), (2, u"特色主题")]
+
 
 class FindFile(FlaskForm):
     input = StringField("", render_kw={'placeholder': u'输入您想查找的文章内容...'})
@@ -45,21 +47,18 @@ class LoginForm(FlaskForm):
 
 class CreateTopic(FlaskForm):
     topic_name = StringField(u'主题名称', validators=[DataRequired()], render_kw={'placeholder': u'输入您想创建的主题...'})
-    filename = FileField(u"主题图片",  validators=[DataRequired()])
-    topic_info = TextAreaField(u"主题简介",  validators=[DataRequired()])
-    topic_id = SelectField('主题类型', coerce=int,  validators=[DataRequired()])
+    filename = FileField(u"主题图片", validators=[DataRequired()])
+    topic_info = TextAreaField(u"主题简介", validators=[DataRequired()])
+    topic_id = SelectField(u'主题类型', coerce=int, validators=[DataRequired()])
     submit = SubmitField(u'创建')
 
     def __init__(self, topic_name="", filename="", topic_info=""):
         super(CreateTopic, self).__init__()
         if topic_name:
             self.topic_name = topic_name
-        if filename:
-            self.topic_name = topic_name
         if topic_info:
             self.topic_info = topic_info
-        self.topic_id.choices = [(0, "国内主题"), (1,"国外主题"), (2, "特色主题")]
-
+        self.topic_id.choices = [(0, u"国内主题"), (1, u"国外主题"), (2, u"特色主题")]
 
 
 class RegisterForm(FlaskForm):

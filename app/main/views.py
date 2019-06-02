@@ -446,14 +446,16 @@ def create_topic():
     form = CreateTopic()
     if request.method == "POST":
         # filter 支持表达式 比 filter 更强大
-        topic = Topic()
-        temp = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first()
-        if temp:
+        topic = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first()
+        if topic:
             flash(u"该主题已经被创建过，请重新输入!", "warning")
             return redirect(url_for("main.create_topic"))
         else:
-            topic.topic_name = form.topic_name.data
+            topic = Topic()
+        topic.topic_name = form.topic_name.data
+        topic.topic_info = form.topic_info.data
         topic.type_id = form.topic_id.data
+
         _file = request.files['filename'] if 'filename' in request.files else None
 
         if _file:
@@ -462,17 +464,6 @@ def create_topic():
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.create_topic"))
-
-            dirname = current_app.config['UPLOAD_FOLDER']  # 截图存放地点
-            topic.image_name = secure_filename(str(topic.topic_name) + "_topic_." + _type)
-            if not os.path.exists(dirname):
-                try:
-                    os.makedirs(dirname)
-                    _file.save(os.path.join(dirname, topic.image_name))
-                except Exception as e:
-                    print(e)
-            else:
-                _file.save(os.path.join(dirname, topic.image_name))
 
         topic.user_id = current_user.id
         topic.topic_info = form.topic_info.data
@@ -486,10 +477,65 @@ def create_topic():
         db.session.add(info)
         db.session.add(topic)
         db.session.commit()
-
+        topic_id = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first().id
+        image = base64.b64encode(_file.read()).decode('utf8')
+        hbase = HBaseDBConnection()
+        hbase.execute_insert('image', 'topic_{}'.format(topic_id), ['image_type', 'image'], ['png', image])
+        hbase.dbpool.close()
         flash(u"创建成功", "success")
-        return redirect(url_for("main.user_information", key=current_user.id))
+        return redirect(url_for("user.topic_manager", key=current_user.id))
     return render_template("edit/edit_topic.html", form=form)
+
+
+@main.route("/edit_topic/<int:key>", methods=['GET', 'POST'])
+@login_required
+def edit_topic(key):
+    form = CreateTopic()
+    temp = Topic.query.filter_by(id=key).first_or_404()
+    topic_id = temp.id
+    topic_name = temp.topic_name
+    topic_info = temp.topic_info
+    topic_type_id = temp.type_id
+    if request.method == "POST":
+        # filter 支持表达式 比 filter 更强大
+        topic = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first()
+        if topic and topic.user_id != current_user.id:
+            flash(u"该主题已经被创建过，请重新输入!", "warning")
+            return redirect(url_for("main.create_topic"))
+        topic = Topic.query.filter_by(id=key).first_or_404()
+        topic.topic_name = form.topic_name.data
+        topic.topic_info = form.topic_info.data
+        topic.type_id = form.topic_id.data
+
+        _file = request.files['filename'] if 'filename' in request.files else None
+
+        if _file:
+            _type = _file.filename.split(".")[-1].lower()
+
+            if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
+                flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
+                return redirect(url_for("main.edit_topic"))
+
+        topic.topic_info = form.topic_info.data
+        info = Information()
+        info.time = datetime.datetime.utcnow()
+        info.launch_id = current_user.id
+        info.receive_id = current_user.id
+        db.session.add(info)
+        db.session.flush()
+        info.info = u"用户" + current_user.username + u"修改了专题 {}。".format(topic.topic_name)
+        db.session.add(info)
+        db.session.add(topic)
+        db.session.commit()
+        image = base64.b64encode(_file.read()).decode('utf8')
+        hbase = HBaseDBConnection()
+        hbase.execute_insert('image', 'topic_{}'.format(key), ['image_type', 'image'], ['png', image])
+        hbase.dbpool.close()
+        flash(u"修改成功", "success")
+        return redirect(url_for("main.edit_topic", key=topic.id))
+    return render_template("edit/edit_topic.html", form=form, topic_id=topic_id, topic_name=topic_name,
+                               topic_info=topic_info,
+                               topic_type_id=topic_type_id)
 
 
 @main.route("/edit_basic", methods=['GET', 'POST'])

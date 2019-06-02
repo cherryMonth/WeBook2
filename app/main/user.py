@@ -510,6 +510,12 @@ def get_topic_info():
     key = int(request.args.get('key'))
     topic = Topic.query.filter_by(id=key).first_or_404()
     user = User.query.filter_by(id=topic.user_id).first_or_404()
+    if topic.user_id == current_user.id:
+        edit_topic_html = u"""<div style="float:right;">
+                            <a href="/edit_topic/{}">修改主题信息</a>
+                         </div>""".format(topic.id)
+    else:
+        edit_topic_html = ""
     html = u"""<div style="float:left;">
                     <a id="topic_info" class="warp-img">
                         <img id='topic_image' style="margin-left: 20px;"
@@ -517,6 +523,7 @@ def get_topic_info():
                              style="float:right;margin-right:37%" height="200" width="250">
                     </a>
                 </div>
+                {}
                 <div>
                     <div class="li_title" style="float: left" id="topic_title">
                        {}
@@ -535,5 +542,5 @@ def get_topic_info():
                         <span style="margin-left: 20px" class="flask-moment" data-timestamp="{}" data-format="fromNow(0)" data-refresh="0">{}</span>
                     </div>
                 """
-    return html.format(topic.image_name, topic.topic_name, topic.topic_info, user.id, user.id, user.id, user.username,
+    return html.format(topic.id, edit_topic_html, topic.topic_name, topic.topic_info, user.id, user.id, user.id, user.username,
                        topic.create_time, topic.create_time)
