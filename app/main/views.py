@@ -135,6 +135,7 @@ def user_information(key):
 
 @main.route("/display/<key>", methods=['GET', "POST"])
 def dispaly(key):
+    map_key = os.environ.get('map_key')
     p = Category.query.filter_by(id=key).first()
     if not current_user.is_anonymous:
         is_collect = Favorite.query.filter_by(favorited_id=key, favorite_id=current_user.id).first()
@@ -170,7 +171,7 @@ def dispaly(key):
             comments[_index].comment_user = User.query.filter_by(id=comments[_index].comment_user_id).first().username
 
     return render_template("display.html", post=p, is_collect=is_collect, comments=comments, rate=p.rate,
-                           people_num=people_num, rate_list=rate_list, location=p.location)
+                           people_num=people_num, rate_list=rate_list, location=p.location, map_key=map_key)
 
 
 @main.route("/cancel/<key>", methods=['GET', "POST"])

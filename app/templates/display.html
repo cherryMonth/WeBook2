@@ -279,7 +279,7 @@
                         window.wd = position.coords.latitude;  // 维度
                         window.jd = position.coords.longitude;  // 经度
                         $.ajax({
-                            url: "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" + window.jd + "," + window.wd + "&key=40913b5c086c2ef82192bbd0afff78b7&radius=1000&extensions=all",
+                            url: "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" + window.jd + "," + window.wd + "&key={{ map_key }}",
                             type: "GET",
                             dataType: "json",
                             success: function (data) {
