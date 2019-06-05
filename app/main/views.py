@@ -20,6 +20,8 @@ from app.main.auth import logout
 import cgi
 # from tornado.ioloop import IOLoop
 import re
+import base64
+from app.main.hbase import HBaseDBConnection
 
 main = Blueprint("main", __name__)
 
@@ -673,28 +675,29 @@ def edit_comment(key):
 @login_required
 def response_comment(post_id, key):
     if request.method == "POST":
-        info = request.form["comment"]
-        if not Category.query.filter_by(id=post_id).first():
-            abort(404)
-        comment = Comment(body=cgi.escape(info), author_id=current_user.id, post_id=post_id)
-        comment.comment_user_id = key
-        _info = Information()
-        _info.time = datetime.datetime.utcnow()
-        _info.launch_id = current_user.id
-        category = Category.query.filter_by(id=post_id).first()
-        _info.receive_id = comment.comment_user_id
-        comment.timestamp = datetime.datetime.utcnow()
-        db.session.add(_info)
-        db.session.add(comment)
-        db.session.flush()
-        _info.info = u"用户" + current_user.username + u" 对您在" + u"<a style='color: #d82433' " \
-                                                               u"href='{}?check={}'>{}</a>".format(
-            u"/display/" + str(category.id), _info.id, category.title) + \
-                     u"的评论进行了回复!"
+        if request.method == "POST":
+            info = request.form["comment"]
+            if not Category.query.filter_by(id=post_id).first():
+                abort(404)
+            comment = Comment(body=cgi.escape(info), author_id=current_user.id, post_id=post_id)
+            comment.comment_user_id = key
+            _info = Information()
+            _info.time = datetime.datetime.utcnow()
+            _info.launch_id = current_user.id
+            category = Category.query.filter_by(id=post_id).first()
+            _info.receive_id = comment.comment_user_id
+            comment.timestamp = datetime.datetime.utcnow()
+            db.session.add(_info)
+            db.session.add(comment)
+            db.session.flush()
+            _info.info = u"用户" + current_user.username + u" 对您在" + u"<a style='color: #d82433' " \
+                                                                   u"href='{}?check={}'>{}</a>".format(
+                u"/display/" + str(category.id), _info.id, category.title) + \
+                         u"的评论进行了回复!"
 
-        db.session.commit()
-        flash(u"回复成功!", "success")
-        return redirect("/display/" + str(post_id))
+            db.session.commit()
+            flash(u"回复成功!", "success")
+            return redirect("/display/" + str(post_id))
 
 
 @main.route("/del_comment/<key>", methods=['GET', 'POST'])

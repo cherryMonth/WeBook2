@@ -155,7 +155,7 @@ def forget():
         token = user.generate_confirmation_token()
         send_email([user.email], u'验证您的账号',
                    'auth/email/forget', user=user, token=token)
-        print (token)
+        print(token)
         flash(u"一封验证邮件发送到了你的邮箱,请您验收!", "success")
         return redirect(url_for("auth.login"))
     return render_template("auth/check_info.html", form=form)

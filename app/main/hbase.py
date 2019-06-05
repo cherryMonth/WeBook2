@@ -58,7 +58,6 @@ class HBaseDBConnection(object):
     def query_by_row(self, table, row):
         return self.dbpool.table(table).row(row=row)
 
-
 if __name__ == '__main__':
     # db.execute_insert('test', ['id', 'name', 'password'], ['123', 123, 123])
     import base64
