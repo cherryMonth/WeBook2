@@ -4,8 +4,6 @@ from twisted.internet import reactor
 from twisted.web import server
 from twisted.web.wsgi import WSGIResource
 from twisted.python import log
-from app.main.hbase import HBaseDBConnection
-import sys
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 import os
