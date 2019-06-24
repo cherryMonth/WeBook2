@@ -476,7 +476,7 @@ def create_topic():
         db.session.add(topic)
         db.session.commit()
         topic_id = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first().id
-        _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], "topic_" + str(topic_id)))
+        _file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], "topic_" + str(topic_id)))
         flash(u"创建成功", "success")
         return redirect(url_for("users.topic_manager", key=current_user.id))
     return render_template("edit/edit_topic.html", form=form)
@@ -508,7 +508,7 @@ def edit_topic(key):
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.edit_topic"))
-        _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], "topic_" + str(topic.id)))
+        _file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], "topic_" + str(topic.id)))
         topic.topic_info = form.topic_info.data
         info = Information()
         info.time = datetime.datetime.utcnow()
@@ -738,6 +738,6 @@ def show_image(key):
 @main.route("/show_topic_image/<key>", methods=['GET', 'POST'])
 def show_topic_image(key):
     if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + key):
-        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], "-1.jpg")
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
     else:
-        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], key)
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], key)
