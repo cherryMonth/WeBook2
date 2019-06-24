@@ -2,6 +2,7 @@
 
 from flask import redirect, flash, url_for, request, abort, send_from_directory, Response
 from flask import Blueprint, current_app, session
+from werkzeug.utils import secure_filename
 from app.main.forms import PostForm, FindFile, EditInfoForm, EditBasic, EditPassword, CreateTopic
 from flask_login import login_required, current_user
 from app import db
@@ -14,14 +15,11 @@ import time
 from sqlalchemy import text
 from sqlalchemy.sql import func
 import subprocess
-from hbase import HBaseDBConnection
-import base64
 from app.main.auth import logout
 import cgi
 # from tornado.ioloop import IOLoop
 import re
 import base64
-from app.main.hbase import HBaseDBConnection
 
 main = Blueprint("main", __name__)
 
@@ -459,10 +457,8 @@ def create_topic():
         topic.type_id = form.topic_id.data
         topic.image_name = "null"
         _file = request.files['filename'] if 'filename' in request.files else None
-
+        _type = _file.filename.split(".")[-1].lower()
         if _file:
-            _type = _file.filename.split(".")[-1].lower()
-
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.create_topic"))
@@ -480,10 +476,7 @@ def create_topic():
         db.session.add(topic)
         db.session.commit()
         topic_id = Topic.query.filter_by(topic_name=form.topic_name.data, type_id=form.topic_id.data).first().id
-        image = base64.b64encode(_file.read()).decode('utf8')
-        hbase = HBaseDBConnection()
-        hbase.execute_insert('image', 'topic_{}'.format(topic_id), ['image_type', 'image'], ['png', image])
-        hbase.dbpool.close()
+        _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], "topic_" + str(topic_id)))
         flash(u"创建成功", "success")
         return redirect(url_for("users.topic_manager", key=current_user.id))
     return render_template("edit/edit_topic.html", form=form)
@@ -510,14 +503,12 @@ def edit_topic(key):
         topic.type_id = form.topic_id.data
 
         _file = request.files['filename'] if 'filename' in request.files else None
-
+        _type = _file.filename.split(".")[-1].lower()
         if _file:
-            _type = _file.filename.split(".")[-1].lower()
-
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.edit_topic"))
-
+        _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], "topic_" + str(topic.id)))
         topic.topic_info = form.topic_info.data
         info = Information()
         info.time = datetime.datetime.utcnow()
@@ -529,10 +520,6 @@ def edit_topic(key):
         db.session.add(info)
         db.session.add(topic)
         db.session.commit()
-        image = base64.b64encode(_file.read()).decode('utf8')
-        hbase = HBaseDBConnection()
-        hbase.execute_insert('image', 'topic_{}'.format(key), ['image_type', 'image'], ['png', image])
-        hbase.dbpool.close()
         flash(u"修改成功", "success")
         return redirect(url_for("main.edit_topic", key=topic.id))
     return render_template("edit/edit_topic.html", form=form, topic_id=topic_id, topic_name=topic_name,
@@ -560,14 +547,10 @@ def edit_basic():
         _file = request.files['filename'] if 'filename' in request.files else None
         if _file:
             _type = _file.filename.split(".")[-1].lower()
-
             if not _type or _type not in ['jpeg', 'jpg', 'bmp', "png"]:
                 flash(u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png'!", "warning")
                 return redirect(url_for("main.edit_basic"))
-            image = base64.b64encode(_file.read()).decode('utf8')
-            hbase = HBaseDBConnection()
-            hbase.execute_insert('image', 'user_{}'.format(current_user.id), ['image_type', 'image'], [_type, image])
-            hbase.dbpool.close()
+            _file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], "user_" + str(current_user.id)))
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
         db.session.add(current_user)
@@ -746,23 +729,15 @@ def del_comment(key):
 
 @main.route("/show_image/<key>", methods=['GET', 'POST'])
 def show_image(key):
-    hbase = HBaseDBConnection()
-    file_bytes = hbase.query_by_row('image', 'user_' + key)
-    hbase.dbpool.close()
-    if file_bytes:
-        file_bytes = file_bytes[b'image:image']
-        result = base64.b64decode(file_bytes.decode())
-        return Response(result, mimetype='image/jpeg')
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
+    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + key):
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
+    else:
+        return send_from_directory(current_app.config['UPLOAD_FOLDER'], key)
 
 
 @main.route("/show_topic_image/<key>", methods=['GET', 'POST'])
 def show_topic_image(key):
-    hbase = HBaseDBConnection()
-    file_bytes = hbase.query_by_row('image', 'topic_' + key)
-    hbase.dbpool.close()
-    if file_bytes:
-        file_bytes = file_bytes[b'image:image']
-        result = base64.b64decode(file_bytes.decode())
-        return Response(result, mimetype='image/jpeg')
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
+    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + key):
+        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], "-1.jpg")
+    else:
+        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], key)

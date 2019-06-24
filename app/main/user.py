@@ -3,9 +3,6 @@
 from flask import render_template, redirect, flash, url_for, request, abort, Response
 from flask import Blueprint, current_app, send_from_directory
 import os
-import requests
-from hbase import HBaseDBConnection
-import base64
 import re
 from app.main.parse import Extractor
 import markdown
@@ -134,7 +131,7 @@ def get_user_info():
         # 对象的序列化为字典 info.update(_user.__dict__)
         info['username'] = _user.username
         info['follow_num'] = _user.follow_num
-        info['image_name'] = "https://www.webook.mobi/show_image/{}".format(_user.id)
+        info['image_name'] = "https://www.webook.mobi/show_image/user_{}".format(_user.id)
         info['about_me'] = _user.about_me
         info['id'] = _user.id
         info['collect_num'] = _user.collect_num
@@ -165,12 +162,13 @@ def send_info(key):
 def upload_images():
     _file = request.files.get('editormd-image-file')
     result = dict()
-    _type = _file.filename.split(".")[-1].lower()
-    filename = secure_filename(_file.filename)
-    image = base64.b64encode(_file.read()).decode('utf8')
-    hbase = HBaseDBConnection()
-    hbase.execute_insert('image', filename, ['image_type', 'image'], [_type, image])
-    hbase.dbpool.close()
+    filename = _file.filename
+    if os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + filename):
+        result['success'] = 0
+        result['message'] = u"该文件名已经存在，无法覆盖!"
+        result['url'] = None
+        return json.dumps(result)
+    _type = filename.split(".")[-1].lower()
     if not _type or _type not in ["jpg", "jpeg", "gif", "png", "bmp", "webp"]:
         result['success'] = 0
         result['message'] = u"图片格式错误，当前只支持'jpeg', 'jpg', 'bmp', 'png', 'webp'" \
@@ -178,6 +176,7 @@ def upload_images():
         result['url'] = None
         return json.dumps(result)
     else:
+        _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], filename))
         result['success'] = 1
         result['message'] = u"上传成功!"
         result['url'] = "http://127.0.0.1:5000/display_images/{}".format(filename)
@@ -186,14 +185,10 @@ def upload_images():
 
 @user.route("/display_images/<filename>", methods=['GET'])
 def display_images(filename):
-    hbase = HBaseDBConnection()
-    file_bytes = hbase.query_by_row('image', filename)
-    hbase.dbpool.close()
-    if file_bytes:
-        file_bytes = file_bytes[b'image:image']
-        result = base64.b64decode(file_bytes.decode())
-        return Response(result, mimetype='image/jpeg')
-    return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
+    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + filename):
+        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], "-1.jpg")
+    else:
+        return send_from_directory(current_app.config['PAGE_UPLOAD_FOLDER'], filename)
 
 
 @user.route('/get_category', methods=['GET', "POST"])
@@ -334,7 +329,7 @@ def get_dynamics():
                         </div>
                     </li>"""
 
-        image_url = "/show_image/{}".format(info.launch_id)
+        image_url = "/show_image/user_{}".format(info.launch_id)
         lauch_name = User.query.filter_by(id=info.launch_id).first_or_404().username
         update_time = str(info.time)
         html = html.format(info.id, info.launch_id, image_url, lauch_name, info.info, update_time, update_time)
@@ -506,7 +501,7 @@ def get_topic_info():
     html = u"""<div style="float:left;">
                     <a id="topic_info" class="warp-img">
                         <img id='topic_image' style="margin-left: 20px;"
-                             src='/show_topic_image/{}'
+                             src='/show_topic_image/topic_{}'
                              style="float:right;margin-right:37%" height="200" width="250">
                     </a>
                 </div>
@@ -521,7 +516,7 @@ def get_topic_info():
                     </div>
                     <div id="user_info" style="margin-top: 100px;margin-left: 80%" class="container">
                         <a class="avatar" href="/user_information/{}">
-                            <img src="/show_image/{}" class="round_icon" style="float:left"></a>
+                            <img src="/show_image/user_{}" class="round_icon" style="float:left"></a>
                         <div id="info" class="info">
                         <div class="title">
                             <a class="name" href="/user_information/{}">{}</a>

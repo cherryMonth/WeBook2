@@ -46,7 +46,7 @@
                     {% for info in info_list %}
                         <tr id="{{ info_list.index(info) + 1 }}">
                             <td style="word-wrap:break-word;width:20%">
-                                <img src="/show_image/{{ info['launch_id'] }}" style="height: 30px;width: 30px">
+                                <img src="/show_image/user_{{ info['launch_id'] }}" style="height: 30px;width: 30px">
                                 <a href="/user_information/{{ info['launch_id'] }}"
                                    style=" color: black;cursor: pointer;">&nbsp;{{ info['author'].username }}</a>
                             </td>

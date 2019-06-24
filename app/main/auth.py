@@ -1,11 +1,9 @@
 # coding=utf-8
 
 from flask import send_from_directory, render_template, redirect, flash, url_for, request
-from flask import Blueprint, session
+from flask import Blueprint, session, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from app import db
-from hbase import HBaseDBConnection
-import base64
 from ..email import send_email
 import os
 from app.main.forms import LoginForm, RegisterForm, ForgetForm
@@ -79,10 +77,7 @@ def register():
         db.session.commit()
 
         user_id = User.query.filter_by(username=user.username).first().id
-        image = base64.b64encode(_file.read()).decode('utf8')
-        hbase = HBaseDBConnection()
-        hbase.execute_insert('image', 'user_{}'.format(user_id), ['image_type', 'image'], [_type, image])
-        hbase.dbpool.close()
+        _file.save(os.path.join(current_app.config['UPLOAD_FOLDER'], "user_" + str(user_id)))
         token = str(user.generate_confirmation_token())
         send_email([user.email], u'验证您的账号',
                    'auth/email/confirm', user=user, token=token)
