@@ -95,7 +95,7 @@
             <div class="form-group" style="color:red;width:370px;margin-top:5%">
                 {{ form.filename.label(required, class="form-label", style="color:black", title="好的图片可以引起别人发文的欲望哦...") }}
                 {% if topic_id %}
-                    <img src="/show_topic_image/{{ topic_id }}"
+                    <img src="/show_topic_image/topic_{{ topic_id }}"
                          style="margin-top:10%; margin-bottom:10%;width: 400px;height: 270px;">
                 {% endif %}
                 {{ form.filename(class="form-control", required="false") }}

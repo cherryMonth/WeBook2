@@ -90,7 +90,7 @@ def get_author_list():
     for k in key:
         html = u"""
             <a class="avatar" href="/user_information/{}">
-                <img src="/show_image/{}" class="round_icon" style="float:left"></a>
+                <img src="/show_image/user_{}" class="round_icon" style="float:left"></a>
                 <div id="info" class="info">
                 <div class="title">
                     <a class="name" href="/user_information/{}">{}</a>
