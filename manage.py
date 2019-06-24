@@ -1,23 +1,25 @@
 # coding=utf-8
 
-from twisted.internet import reactor
-from twisted.web import server
-from twisted.web.wsgi import WSGIResource
-from twisted.python import log
+from tornado.options import options, define
+from tornado.ioloop import IOLoop
+from tornado.wsgi import WSGIContainer
+from tornado.httpserver import HTTPServer
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 import os
 from flask_login import current_user
 from flask import redirect, url_for, request
 from app import create_app, db
-from app.main.models import User, Category, Comment, Topic, Favorite
+from app.main.models import User, Category, Comment, Topic
+from flask_script import Manager
 
 import sys
 
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-log.startLogging(sys.stdout)
+define(name="port", default=os.environ.get("ServerConfig"), type=int)
+
 app = create_app('default')
 admin = Admin(app)
 
@@ -42,8 +44,12 @@ admin.add_view(MyModelView(User, db.session, name='user_manager'))
 
 with app.app_context():
     db.create_all()
-
-resource = WSGIResource(reactor, reactor.getThreadPool(), app)
-site = server.Site(resource)
-reactor.listenTCP(int(os.environ.get("ServerConfig")), site)
-reactor.run()
+from flask_migrate import Migrate,MigrateCommand
+migrate = Migrate(app,db)
+manager = Manager(app)
+manager.add_command('db',MigrateCommand) #添加db 命令（runserver的用法）
+#manager.run()
+print ('Server running on http://localhost:%s' % options.port)
+http_server = HTTPServer(WSGIContainer(app))
+http_server.listen(options.port)
+IOLoop.instance().start()
