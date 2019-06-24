@@ -48,7 +48,7 @@ from flask_migrate import Migrate,MigrateCommand
 migrate = Migrate(app,db)
 manager = Manager(app)
 manager.add_command('db',MigrateCommand) #添加db 命令（runserver的用法）
-#manager.run()
+
 print ('Server running on http://localhost:%s' % options.port)
 http_server = HTTPServer(WSGIContainer(app))
 http_server.listen(options.port)

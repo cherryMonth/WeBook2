@@ -8,7 +8,7 @@ class HBaseDBConnection(object):
     image = 'image'  # 图片
 
     def __init__(self):
-        self.dbpool = happybase.Connection(host='192.168.43.31', port=9090, protocol='binary', autoconnect=True)
+        self.dbpool = happybase.Connection(host='127.0.0.1', port=9090, protocol='binary', autoconnect=True)
         self.check_table()
 
     def check_table(self, table_name='image'):
