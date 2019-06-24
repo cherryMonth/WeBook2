@@ -227,30 +227,24 @@ def get_category():
                         </div>
                     </div>
                 </li>"""
-        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
-    ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
-        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon",
-                      "image/vnd.microsoft.icon"]
-        tmp_url = None
-        for url in result:
-            response = requests.get(url[:-1])
-            if response.status_code == 200 and response.headers.get('Content-Type') in image_type:
-                tmp_url = url[:-1]
-                break
-        image_url = tmp_url or "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+    result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+    result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
+    image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
-        exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
-                'markdown.extensions.toc']
-        ext = Extractor(0)
-        content = ext.getPlainText(markdown.markdown(doc.content, extensions=exts))[:75] + "..."
-        update_time = str(doc.update_time)
-        comment_num = len(Comment.query.filter_by(post_id=doc.id).all())
-        html = html.format(doc.id, doc.id, image_url, doc.id, doc.title, doc.id, content, \
-                           doc.rate, doc.id, doc.collect_num, doc.id, comment_num, update_time, update_time)
-        item = dict()
-        item['html'] = html
-        item['id'] = doc.id
-        docs_html_list.append(item)
+    exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
+            'markdown.extensions.toc']
+    ext = Extractor(0)
+    content = ext.getPlainText(markdown.markdown(doc.content, extensions=exts))[:75] + "..."
+    update_time = str(doc.update_time)
+    comment_num = len(Comment.query.filter_by(post_id=doc.id).all())
+    html = html.format(doc.id, doc.id, image_url, doc.id, doc.title, doc.id, content, \
+                       doc.rate, doc.id, doc.collect_num, doc.id, comment_num, update_time, update_time)
+    item = dict()
+    item['html'] = html
+    item['id'] = doc.id
+    docs_html_list.append(item)
+
+
     return json.dumps(docs_html_list)
 
 
@@ -289,17 +283,9 @@ def get_topic_category():
                         </div>
                     </div>
                 </li>"""
-        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
-    ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
-        image_type = ["image/gif", "image/png", "image/jpeg", "image/bmp", "image/webp", "image/x-icon",
-                      "image/vnd.microsoft.icon"]
-        tmp_url = None
-        for url in result:
-            response = requests.get(url[:-1])
-            if response.status_code == 200 and response.headers.get('Content-Type') in image_type:
-                tmp_url = url[:-1]
-                break
-        image_url = tmp_url or "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
+        image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
         exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
                 'markdown.extensions.toc']
@@ -313,6 +299,7 @@ def get_topic_category():
         item['html'] = html
         item['id'] = doc.id
         docs_html_list.append(item)
+
     return json.dumps(docs_html_list)
 
 
@@ -412,8 +399,8 @@ from category, comment where category.id = comment.post_id and category.user = {
                                 </div>
                             </div>
                         </li>"""
-        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
-            ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content,
+                            re.S)
         result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
         image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
@@ -464,8 +451,8 @@ def get_hot():
                             </div>
                         </div>
                     </li>"""
-        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a
-        ...: -fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content,
+                            re.S)
         result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
         image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
@@ -542,5 +529,6 @@ def get_topic_info():
                         <span style="margin-left: 20px" class="flask-moment" data-timestamp="{}" data-format="fromNow(0)" data-refresh="0">{}</span>
                     </div>
                 """
-    return html.format(topic.id, edit_topic_html, topic.topic_name, topic.topic_info, user.id, user.id, user.id, user.username,
+    return html.format(topic.id, edit_topic_html, topic.topic_name, topic.topic_info, user.id, user.id, user.id,
+                       user.username,
                        topic.create_time, topic.create_time)
