@@ -729,7 +729,7 @@ def del_comment(key):
 
 @main.route("/show_image/<key>", methods=['GET', 'POST'])
 def show_image(key):
-    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + key):
+    if not os.path.exists(current_app.config['UPLOAD_FOLDER'] + key):
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
     else:
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], key)
@@ -737,7 +737,7 @@ def show_image(key):
 
 @main.route("/show_topic_image/<key>", methods=['GET', 'POST'])
 def show_topic_image(key):
-    if not os.path.exists(current_app.config['PAGE_UPLOAD_FOLDER'] + key):
+    if not os.path.exists(current_app.config['UPLOAD_FOLDER'] + key):
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], "-1.jpg")
     else:
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], key)
