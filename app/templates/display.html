@@ -163,12 +163,6 @@
         }
     </style>
     <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
-    <script src="https://a.amap.com/jsapi_demos/static/demo-center/js/demoutils.js"></script>
-    <script type="text/javascript"
-            src="https://webapi.amap.com/maps?v=1.4.14&key=ca421a52854417e5c65e84623d1c281f&plugin=AMap.Driving"></script>
-    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
-
 {% endblock %}
 {% block title %} {{ post.title }} {% endblock title %}
 
@@ -198,7 +192,6 @@
             <p>地理位置: {{ location or '暂无' }}</p>
             <div id="main" style="width: 300px;height:200px;float: left;">
             </div>
-            <button class="btn btn-hollow" onclick="f1(this)"  STYLE="MARGIN-TOP: 35%">显示导航地图</button>
         </div>
         <script>
             var myChart = echarts.init(document.getElementById('main'));
@@ -279,7 +272,6 @@
                         window.wd = position.coords.latitude;  // 维度
                         window.jd = position.coords.longitude;  // 经度
                         $.ajax({
-                            url: "https://restapi.amap.com/v3/geocode/regeo?output=json&location=" + window.jd + "," + window.wd + "&key={{ map_key }}",
                             type: "GET",
                             dataType: "json",
                             success: function (data) {
