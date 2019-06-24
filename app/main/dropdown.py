@@ -53,7 +53,7 @@ def get_index_page():
         result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content,
                             re.S)
         result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
-        image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+        image_url = result[0][:-1] if result else "https://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
         exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
                 'markdown.extensions.toc']
