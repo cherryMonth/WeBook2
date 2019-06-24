@@ -227,22 +227,22 @@ def get_category():
                         </div>
                     </div>
                 </li>"""
-    result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content, re.S)
-    result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
-    image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
+        image_url = result[0][:-1] if result else "http://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
-    exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
-            'markdown.extensions.toc']
-    ext = Extractor(0)
-    content = ext.getPlainText(markdown.markdown(doc.content, extensions=exts))[:75] + "..."
-    update_time = str(doc.update_time)
-    comment_num = len(Comment.query.filter_by(post_id=doc.id).all())
-    html = html.format(doc.id, doc.id, image_url, doc.id, doc.title, doc.id, content, \
-                       doc.rate, doc.id, doc.collect_num, doc.id, comment_num, update_time, update_time)
-    item = dict()
-    item['html'] = html
-    item['id'] = doc.id
-    docs_html_list.append(item)
+        exts = ['markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables',
+                'markdown.extensions.toc']
+        ext = Extractor(0)
+        content = ext.getPlainText(markdown.markdown(doc.content, extensions=exts))[:75] + "..."
+        update_time = str(doc.update_time)
+        comment_num = len(Comment.query.filter_by(post_id=doc.id).all())
+        html = html.format(doc.id, doc.id, image_url, doc.id, doc.title, doc.id, content, \
+                           doc.rate, doc.id, doc.collect_num, doc.id, comment_num, update_time, update_time)
+        item = dict()
+        item['html'] = html
+        item['id'] = doc.id
+        docs_html_list.append(item)
 
 
     return json.dumps(docs_html_list)
