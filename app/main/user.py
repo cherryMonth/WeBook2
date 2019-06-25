@@ -492,7 +492,7 @@ def get_topic_info():
     key = int(request.args.get('key'))
     topic = Topic.query.filter_by(id=key).first_or_404()
     user = User.query.filter_by(id=topic.user_id).first_or_404()
-    if topic.user_id == current_user.id:
+    if current_user.is_authenticated and topic.user_id == current_user.id:
         edit_topic_html = u"""<div style="float:right;">
                             <a href="/edit_topic/{}">修改主题信息</a>
                          </div>""".format(topic.id)
