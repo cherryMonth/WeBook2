@@ -167,7 +167,7 @@ def dispaly(key):
         comments[_index].author = User.query.filter_by(id=comments[_index].author_id).first().username
         comments[_index].img = comments[_index].author_id
 
-        if comments[_index].comment_user_id or 0 > 0:
+        if comments[_index].comment_user_id:
             comments[_index].comment_user = User.query.filter_by(id=comments[_index].comment_user_id).first().username
 
     return render_template("display.html", post=p, is_collect=is_collect, comments=comments, rate=p.rate,
