@@ -44,6 +44,7 @@ admin.add_view(MyModelView(User, db.session, name='user_manager'))
 
 with app.app_context():
     db.create_all()
+
 from flask_migrate import Migrate,MigrateCommand
 migrate = Migrate(app,db)
 manager = Manager(app)
