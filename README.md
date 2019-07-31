@@ -5,10 +5,3 @@
 支持PDF导出，用户互相关注，互相评论等功能。
 
 [webook链接](https://www.webook.mobi)
-
-```html
-<div>
-<a>asd</a>
-</div>
-```
-
