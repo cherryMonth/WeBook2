@@ -56,7 +56,7 @@ class TopicMember(db.Model):  # 专题小组
     __tablename__ = 'topicmember'
 
     id = db.Column(db.Integer(), primary_key=True, nullable=False)
-    topic_id = db.Column(db.Integer(), db.ForeignKey('topic.id'), nullable=False)
+    topic_id = db.Column(db.Integer(), db.ForeignKey('topic.id'), default=1, nullable=False)
     topic_user_id = db.Column(db.Integer(), db.ForeignKey('users.id'), nullable=False)
     user_type = db.Column(db.Integer())  # 0 普通用户
     # 1 成员用户

@@ -179,7 +179,7 @@ def upload_images():
         _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], filename))
         result['success'] = 1
         result['message'] = u"上传成功!"
-        result['url'] = "http://127.0.0.1:5000/display_images/{}".format(filename)
+        result['url'] = "https://www.webook.mobi/display_images/{}".format(filename)
         return json.dumps(result)
 
 

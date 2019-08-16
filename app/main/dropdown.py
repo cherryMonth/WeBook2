@@ -73,19 +73,21 @@ def get_index_page():
 @dropdown.route("/get_author_list", methods=['GET', 'POST'])
 def get_author_list():
 
-    user = str(current_user.id)
+    #user = str(current_user.id)
     # 取出来对应的内部user id => to_inner_uid
-    playlist_inner_id = algo.trainset.to_inner_uid(user)
-    print("内部id", playlist_inner_id)
+    #playlist_inner_id = algo.trainset.to_inner_uid(user)
+    #print("内部id", playlist_inner_id)
 
-    playlist_neighbors = algo.get_neighbors(playlist_inner_id, k=100)
+    #playlist_neighbors = algo.get_neighbors(playlist_inner_id, k=100)
 
-    author_id_list = random.sample(playlist_neighbors, 3)
+    #author_id_list = random.sample(playlist_neighbors, 3)
     # to_raw_uid映射回去
-    playlist_neighbors = (algo.trainset.to_raw_uid(inner_id)
-                          for inner_id in author_id_list)
-
-    key = [User.query.filter_by(id=int(author)).first().id for author in playlist_neighbors]
+    #playlist_neighbors = (algo.trainset.to_raw_uid(inner_id)
+    #                      for inner_id in author_id_list)
+    playlist_neighbors = User.query.order_by('collect_num desc').all()[:20]
+    import random
+    key = random.sample(playlist_neighbors, 3)
+    key = map(lambda x:x.id, key)
     author_json_list = list()
     for k in key:
         html = u"""

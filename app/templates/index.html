@@ -4,6 +4,8 @@
     {% block title %}We Book {% endblock %}
 
     {% block metas %}
+    <meta name="google-site-verification" content="WcQqxSPoOZwHKBe_SLM5uN3gtrYooBjXLoxdtM4Rox8" />
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
         <meta name="baidu-site-verification" content="Yswrm2DNTr"/>
         <link rel="shortcut icon" href="/static/favicon.ico"/>
         <link rel="bookmark" href="/static/favicon.ico"/>
@@ -29,6 +31,10 @@
         <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.css.map">
         <script type="text/javascript" src="/static/js/modernizr-2.6.2.min.js"></script>
         <style>
+            #live2dcanvas {
+                        border: 0 !important;
+            }
+
             .round_icon {
                 width: 50px;
                 height: 50px;
@@ -260,7 +266,7 @@
                                 <li><a href="{{ url_for('main.index') }}">首页</a></li>
                                 <li><a href="{{ url_for('main.find_file', key=7) }}">发现</a></li>
                                 <li><a href="{{ url_for('users.find_user') }}">关注</a></li>
-                                <li><a href="{{ url_for('users.topic_manager', key=0) }}">旅游攻略</a></li>
+                                <li><a href="{{ url_for('users.topic_manager', key=0) }}">主题攻略</a></li>
                                 {% if not current_user.is_anonymous %}
                                     <li style="margin-left:25%"><a
                                             href="{{ url_for('users.information', page=1) }}">消息<span
@@ -303,6 +309,20 @@
                 </div>
             </div>
         </div>
+        <script type="text/javascript" charset="utf-8"
+                src="https://cdn.jsdelivr.net/npm/live2d-widget@3.0.4/lib/L2Dwidget.min.js"></script>
+                <script type="text/javascript">
+            L2Dwidget.init({
+                                    "display": {
+                                                        "superSample": 2,
+                                                                            "width": 200,
+                                                                                                "height": 400,
+                                                                                                                    "position": "right",
+                                                                                                                                        "hOffset": 0,
+                                                                                                                                                            "vOffset": 0
+                                                                                                                                                                            }
+                                                                                                                                                                                        });
+        </script>
     {% endblock navbar %}
 
     {% block message %}
@@ -514,9 +534,9 @@
                 <ul>
                     <li class="links">
                         <ul>
-                            <li><img src="/static/img/record_logo.png" style="float:left; width: 18px; height: 18px;">
+                            <li>
                                 <a style="color:white" href="http://www.miitbeian.gov.cn">豫ICP备18023119号</a></li>
-                            <li><a href="/">目前是正式1.5版本哦. O(∩_∩)O</a></li>
+                            <li><a href="/">目前是正式2.0版本哦. O(∩_∩)O</a></li>
                         </ul>
                     </li>
                     <li class="about" style="float:right">

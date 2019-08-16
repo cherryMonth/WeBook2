@@ -11,6 +11,7 @@ from flask_login import current_user
 from flask import redirect, url_for, request
 from app import create_app, db
 from app.main.models import User, Category, Comment, Topic
+from flask_script import Manager
 
 import sys
 
@@ -43,6 +44,11 @@ admin.add_view(MyModelView(User, db.session, name='user_manager'))
 
 with app.app_context():
     db.create_all()
+
+from flask_migrate import Migrate,MigrateCommand
+migrate = Migrate(app,db)
+manager = Manager(app)
+manager.add_command('db',MigrateCommand) #添加db 命令（runserver的用法）
 
 print ('Server running on http://localhost:%s' % options.port)
 http_server = HTTPServer(WSGIContainer(app))
