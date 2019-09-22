@@ -217,7 +217,7 @@ def show_collect(key=0):
     return render_template("collect.html", doc_list=doc_list, length=len(doc_list))
 
 
-@main.route("/del_file/<int:key>/<int:page>", methods=['GET', "POST"])
+@main.route("/del_file/<int:page>/<int:key>", methods=['GET', "POST"])
 @login_required
 def del_file(key, page):
     p = Category.query.filter_by(id=key, user=current_user.id).first()
@@ -232,7 +232,7 @@ def del_file(key, page):
     db.session.delete(p)
     db.session.commit()
     flash(u'删除成功！', 'success')
-    return redirect(url_for("main.my_doc", key=current_user.id, _id=page))
+    return redirect(url_for("main.user_information", key=current_user.id))
 
 
 """
