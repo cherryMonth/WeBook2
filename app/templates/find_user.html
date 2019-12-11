@@ -88,7 +88,7 @@
         {{ form.hidden_tag() }}
         <div class="container">
             <div class="form-group" style="float:left">
-                {{ form.input(class='form-control', style="width:500px;margin-left:20%", maxlength="30",
+                {{ form.input(minlength="3", class='form-control', style="width:500px;margin-left:20%", maxlength="30",
                 required="required") }}
             </div>
             <div class="form-group" style="float:right">
@@ -185,7 +185,7 @@
                         <a href="/unfollowed_user/{{ user.id }}">取消关注</a>
                         {% else %}
                         <a href="/followed_user/{{ user.id }}">关注此用户</a>
-                        {% endif %}<a href="/my_doc/{{ user.id }}/1" style="margin-left: 20%;">ta的首页</a>
+                        {% endif %}<a href="/user_information/{{ user.id }}" style="margin-left: 20%;">ta的首页</a>
                         <a href="#form{{ user.id }}" id={{ user.id }} onclick="begin(this)"
                            style="margin-left: 10%;">发送私信</a>
                     </h4>

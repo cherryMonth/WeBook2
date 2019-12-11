@@ -23,7 +23,7 @@ def find_user():
     form = FindUser()
 
     hot_user_list = User.query.from_statement(
-        text("SELECT * FROM webook.users ORDER BY collect_num DESC LIMIT 5 ;")).all()
+        text("SELECT * FROM users ORDER BY collect_num DESC LIMIT 5 ;")).all()
 
     if form.validate_on_submit():
         user_list = User.query.whooshee_search(form.input.data).all()
