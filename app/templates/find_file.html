@@ -54,7 +54,9 @@
                 $("#input_filename").autocomplete({
                     source: "/autocomplete",
                     minLength: 3, //进行提示的最小输入长度
-                    select: null  // 当用户选中当时候可以触发回调函数
+                    select: function (event, ui) {
+                        window.open('/display/' + ui['item']['id']);
+                    }  // 当用户选中当时候可以触发回调函数
                 });
             });
 

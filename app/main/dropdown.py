@@ -151,5 +151,5 @@ def get_author_list():
 def autocomplete():
     info = request.args['term']
     doc_list = Category.query.whooshee_search(info, order_by_relevance=10).all()
-    doc_list = list(map(lambda x: x.title, doc_list))
+    doc_list = list(map(lambda x: {'id': x.id, 'value': x.title}, doc_list))
     return json.dumps(doc_list)
