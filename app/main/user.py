@@ -50,7 +50,7 @@ def followed_user(key):
         _info = Information()
         _info.launch_id = current_user.id
         _info.receive_id = _user.id
-        _info.info = u"用户" + current_user.username + u" 对您进行了关注!"
+        _info.info = u"用户" + current_user.username + u" 对用户 {} 进行了关注!".format(_user.username)
         db.session.add(_info)
         flash(u"关注成功!", "success")
     return redirect(request.referrer)
