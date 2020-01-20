@@ -84,6 +84,8 @@ class Information(db.Model):
 
     time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
 
+    is_privacy = db.Column(db.Boolean, default=False)
+
     confirm = db.Column(db.Boolean, default=False)
 
     info = db.Column(db.String(200), nullable=True)
