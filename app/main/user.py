@@ -302,7 +302,7 @@ def get_topic_category():
 def get_dynamics():
     key = int(request.args['key'])
     _id = int(request.args['_id'])
-    tmp = Information.query.filter_by(receive_id=key).order_by(Information.time.desc())
+    tmp = Information.query.filter_by(launch_id=key).order_by(Information.time.desc())
     length = len(tmp.all())
     target_page_num = 5
     page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
