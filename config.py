@@ -11,6 +11,7 @@ try:
     os.environ['database'] = cf.get("database", "database")
     os.environ['port'] = cf.get("port", "port")
     os.environ["ServerConfig"] = cf.get("ServerConfig", "server_listen_port")
+    os.environ["produce"] = cf.get("ServerStatus", "produce")
 except Exception as e:
     print ("config file read failed!", str(e))
     exit(-1)
