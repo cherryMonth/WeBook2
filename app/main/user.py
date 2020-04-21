@@ -180,7 +180,10 @@ def upload_images():
         _file.save(os.path.join(current_app.config['PAGE_UPLOAD_FOLDER'], filename))
         result['success'] = 1
         result['message'] = u"上传成功!"
-        result['url'] = "https://www.webook.mobi/display_images/{}".format(filename)
+        if eval(os.environ['produce']):
+            result['url'] = "https://www.webook.mobi/display_images/{}".format(filename)
+        else:
+            result['url'] = request.url_root + "display_images/{}".format(filename)
         return json.dumps(result)
 
 
@@ -223,7 +226,8 @@ def get_category():
                         </div>
                     </div>
                 </li>"""
-        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content,
+                            re.S)
         result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
         image_url = result[0][:-1] if result else "https://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
@@ -239,7 +243,6 @@ def get_category():
         item['html'] = html
         item['id'] = doc.id
         docs_html_list.append(item)
-
 
     return json.dumps(docs_html_list)
 
@@ -279,7 +282,8 @@ def get_topic_category():
                         </div>
                     </div>
                 </li>"""
-        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content, re.S)
+        result = re.findall(r"""http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|(?:%[0-9a-fA-F][0-9a-fA-F]))+""", doc.content,
+                            re.S)
         result = list(filter(lambda x: x.lower().endswith(('.gif)', '.jpg)', '.png)', '.jpeg)', 'webp)')), result))
         image_url = result[0][:-1] if result else "https://www.webook.mobi/display_images/purple-4163951_1280.jpg"
 
