@@ -12,7 +12,7 @@ from app.main.models import User, Information
 from app import db
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
-from sqlalchemy import text
+from sqlalchemy import text, distinct
 import json
 
 user = Blueprint("users", __name__)
@@ -307,7 +307,8 @@ def get_topic_category():
 def get_dynamics():
     key = int(request.args['key'])
     _id = int(request.args['_id'])
-    tmp = Information.query.filter_by(launch_id=key, is_privacy=False).order_by(Information.time.desc())
+    tmp = Information.query.filter_by(launch_id=key, is_privacy=False).group_by(Information.time).order_by(
+        Information.time.desc())
     length = len(tmp.all())
     target_page_num = 5
     page_num = int(length / target_page_num if length % target_page_num == 0 else length / target_page_num + 1)
